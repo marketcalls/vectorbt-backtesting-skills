@@ -2,6 +2,38 @@
 
 A collection of Claude Code skills for backtesting trading strategies using VectorBT with Indian market data via OpenAlgo.
 
+## Quick Install
+
+Install the skills directly into your project using [npx skills](https://github.com/vercel-labs/skills):
+
+```bash
+# GitHub shorthand
+npx skills add marketcalls/vectorbt-backtesting-skills
+
+# Full GitHub URL
+npx skills add https://github.com/marketcalls/vectorbt-backtesting-skills
+```
+
+Install a specific skill only:
+
+```bash
+npx skills add marketcalls/vectorbt-backtesting-skills -s backtest
+npx skills add marketcalls/vectorbt-backtesting-skills -s optimize
+npx skills add marketcalls/vectorbt-backtesting-skills -s vectorbt-expert
+```
+
+List available skills before installing:
+
+```bash
+npx skills add marketcalls/vectorbt-backtesting-skills -l
+```
+
+Install globally (available across all projects):
+
+```bash
+npx skills add marketcalls/vectorbt-backtesting-skills -g
+```
+
 ## Prerequisites
 
 ### 1. OpenAlgo
