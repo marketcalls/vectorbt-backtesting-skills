@@ -16,12 +16,12 @@ import vectorbt as vbt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from tqdm import tqdm
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from openalgo import api, ta
 
 # --- Config ---
 script_dir = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=script_dir / ".env", override=False)
+load_dotenv(find_dotenv(), override=False)
 
 SYMBOL = "SBIN"
 EXCHANGE = "NSE"

@@ -104,24 +104,15 @@ Install all required packages (latest versions):
 pip install openalgo vectorbt plotly anywidget nbformat ta-lib pandas numpy yfinance python-dotenv tqdm scipy numba nbformat ipywidgets quantstats ccxt
 ```
 
-### Step 5: Create Backtesting Folder Structure
+### Step 5: Create Backtesting Folder
 
-Create the organized backtesting directory with strategy subfolders:
+Create only the top-level backtesting directory. Strategy subfolders are created on-demand when a backtest script is generated (by the `/backtest` skill).
 
 ```bash
-mkdir -p backtesting/ema_crossover
-mkdir -p backtesting/rsi
-mkdir -p backtesting/donchian
-mkdir -p backtesting/supertrend
-mkdir -p backtesting/macd
-mkdir -p backtesting/sda2
-mkdir -p backtesting/momentum
-mkdir -p backtesting/dual_momentum
-mkdir -p backtesting/buy_hold
-mkdir -p backtesting/rsi_accumulation
-mkdir -p backtesting/walk_forward
-mkdir -p backtesting/custom
+mkdir -p backtesting
 ```
+
+Do NOT pre-create strategy subfolders.
 
 ### Step 6: Configure .env File
 
@@ -154,15 +145,9 @@ BINANCE_API_KEY={user_provided_key or ""}
 BINANCE_SECRET_KEY={user_provided_key or ""}
 ```
 
-**6f. Also copy `.env` into each backtesting subdirectory** so scripts can load it from their own directory:
+**6f. Add `.env` to `.gitignore`** if it exists (never commit secrets):
 
-```bash
-for dir in backtesting/*/; do
-    cp .env "$dir/.env"
-done
-```
-
-**6g. Add `.env` to `.gitignore`** if it exists (never commit secrets):
+Scripts use `find_dotenv()` to automatically walk up and find the single root `.env`, so no copies are needed in subdirectories.
 
 ```bash
 grep -qxF '.env' .gitignore 2>/dev/null || echo '.env' >> .gitignore
@@ -201,8 +186,8 @@ Print a summary showing:
 - Python version used
 - Virtual environment path
 - Installed packages and versions
-- Backtesting folder structure created
-- `.env` file status (configured with keys / placeholder)
+- Backtesting folder created (strategy subfolders created on-demand by `/backtest`)
+- `.env` file status (configured with keys / placeholder) — single file at project root
 - Reminder: "Run `cp .env.sample .env` and fill in API keys if you skipped configuration"
 
 ## Important Notes

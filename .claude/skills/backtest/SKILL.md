@@ -21,10 +21,11 @@ If no arguments, ask the user which strategy they want.
 ## Instructions
 
 1. Read the vectorbt-expert skill rules for reference patterns
-2. Create a `.py` file in `backtesting/{strategy_name}/` named `{symbol}_{strategy}_backtest.py`
-3. Use the matching template from `rules/assets/{strategy}/backtest.py` as the starting point
-4. The script must:
-   - Load `.env` from the script directory for OpenAlgo credentials
+2. Create `backtesting/{strategy_name}/` directory if it doesn't exist (on-demand)
+3. Create a `.py` file in `backtesting/{strategy_name}/` named `{symbol}_{strategy}_backtest.py`
+4. Use the matching template from `rules/assets/{strategy}/backtest.py` as the starting point
+5. The script must:
+   - Load `.env` from the project root using `find_dotenv()` (walks up from script dir automatically)
    - Fetch data via `client.history()` from OpenAlgo
    - **Use TA-Lib for ALL indicators** (EMA, SMA, RSI, MACD, BBands, ATR, ADX, STDDEV, MOM)
    - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA)

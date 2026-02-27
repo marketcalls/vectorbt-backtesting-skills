@@ -21,9 +21,10 @@ If no arguments, ask the user which strategy to optimize.
 ## Instructions
 
 1. Read the vectorbt-expert skill rules for reference patterns
-2. Create a `.py` file in `backtesting/{strategy_name}/` named `{symbol}_{strategy}_optimize.py`
-3. The script must:
-   - Load `.env` and fetch data via OpenAlgo `client.history()`
+2. Create `backtesting/{strategy_name}/` directory if it doesn't exist (on-demand)
+3. Create a `.py` file in `backtesting/{strategy_name}/` named `{symbol}_{strategy}_optimize.py`
+4. The script must:
+   - Load `.env` from project root using `find_dotenv()` and fetch data via OpenAlgo `client.history()`
    - **Use TA-Lib for ALL indicators** (never VectorBT built-in)
    - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, etc.)
    - Use `ta.exrem()` to clean signals (always `.fillna(False)` before exrem)

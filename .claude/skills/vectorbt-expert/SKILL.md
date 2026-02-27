@@ -10,15 +10,15 @@ user-invocable: false
 
 - Python with vectorbt, pandas, numpy, plotly
 - Data sources: OpenAlgo (Indian markets), yfinance (US/Global), CCXT (Crypto), custom providers
-- API keys loaded from `.env` via `python-dotenv` — never hardcode keys
+- API keys loaded from single root `.env` via `python-dotenv` + `find_dotenv()` — never hardcode keys
 - Technical indicators: **TA-Lib** (ALWAYS - never use VectorBT built-in indicators)
 - Specialty indicators: `openalgo.ta` for Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA
 - Signal cleaning: `openalgo.ta` for exrem, crossover, crossunder, flip
 - Fee model: Zerodha brokerage calculator values with Rs 20/order
 - Benchmark: NIFTY 50 via OpenAlgo (`NSE_INDEX`) by default
 - Charts: Plotly with `template="plotly_dark"`
-- Environment variables loaded from `.env` file in the script directory
-- Scripts go in `backtesting/{strategy_name}/` directories
+- Environment variables loaded from single `.env` at project root via `find_dotenv()` (walks up from script dir)
+- Scripts go in `backtesting/{strategy_name}/` directories (created on-demand, not pre-created)
 - Never use icons/emojis in code or logger output
 
 ## Critical Rules
@@ -91,12 +91,12 @@ import numpy as np
 import pandas as pd
 import talib as tl
 import vectorbt as vbt
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from openalgo import api, ta
 
 # --- Config ---
 script_dir = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=script_dir / ".env", override=False)
+load_dotenv(find_dotenv(), override=False)
 
 SYMBOL = "SBIN"
 EXCHANGE = "NSE"

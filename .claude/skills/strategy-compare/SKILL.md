@@ -20,7 +20,8 @@ If "long-vs-short" is one of the strategies, compare longonly vs shortonly vs bo
 ## Instructions
 
 1. Read the vectorbt-expert skill rules for reference patterns
-2. Create a `.py` file in `backtesting/strategy_comparison/` named `{symbol}_strategy_comparison.py`
+2. Create `backtesting/strategy_comparison/` directory if it doesn't exist (on-demand)
+3. Create a `.py` file in `backtesting/strategy_comparison/` named `{symbol}_strategy_comparison.py`
 3. The script must:
    - Fetch data once via OpenAlgo
    - **Use TA-Lib for ALL indicators** (never VectorBT built-in)

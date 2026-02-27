@@ -9,18 +9,18 @@ metadata:
 
 ## Environment Setup (All Markets)
 
-Every backtest script must load API keys from `.env` using `python-dotenv`. Never hardcode API keys.
+Every backtest script must load API keys from the single root `.env` using `python-dotenv` + `find_dotenv()`. Never hardcode API keys.
 
 ```python
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
 import pandas as pd
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
-# Load .env from the script's own directory
+# Load .env from project root (find_dotenv walks up from script dir)
 script_dir = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=script_dir / ".env", override=False)
+load_dotenv(find_dotenv(), override=False)
 ```
 
 A `.env.sample` is provided at the project root. Copy it and fill in your keys:
@@ -311,11 +311,11 @@ CUSTOM_API_URL=https://api.example.com
 import os
 import requests
 import pandas as pd
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from pathlib import Path
 
 script_dir = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=script_dir / ".env", override=False)
+load_dotenv(find_dotenv(), override=False)
 
 def fetch_custom_data(symbol, start_date, end_date, interval="1d"):
     """Fetch data from a custom provider.
@@ -370,14 +370,14 @@ close = df["close"]
 ```python
 import os
 import pandas as pd
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from pathlib import Path
 
 # pip install alpaca-trade-api
 from alpaca_trade_api.rest import REST
 
 script_dir = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=script_dir / ".env", override=False)
+load_dotenv(find_dotenv(), override=False)
 
 alpaca = REST(
     key_id=os.getenv("ALPACA_API_KEY"),
@@ -396,14 +396,14 @@ close = bars["close"]
 ```python
 import os
 import pandas as pd
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from pathlib import Path
 
 # pip install twelvedata
 from twelvedata import TDClient
 
 script_dir = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=script_dir / ".env", override=False)
+load_dotenv(find_dotenv(), override=False)
 
 td = TDClient(apikey=os.getenv("TWELVEDATA_API_KEY"))
 ts = td.time_series(symbol="AAPL", interval="1day", start_date="2022-01-01",
