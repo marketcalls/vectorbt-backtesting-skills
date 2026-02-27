@@ -19,14 +19,20 @@ If "long-vs-short" is one of the strategies, compare longonly vs shortonly vs bo
 
 ## Instructions
 
-1. Read the vectorbt-expert skill for reference patterns
-2. Create a `.py` file in `D:\QuantFlow 3\Day17\backtesting\` named `{symbol}_strategy_comparison.py`
+1. Read the vectorbt-expert skill rules for reference patterns
+2. Create a `.py` file in `backtesting/strategy_comparison/` named `{symbol}_strategy_comparison.py`
 3. The script must:
    - Fetch data once via OpenAlgo
+   - **Use TA-Lib for ALL indicators** (never VectorBT built-in)
+   - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, etc.)
+   - Clean signals with `ta.exrem()` (always `.fillna(False)` before exrem)
    - Run each strategy on the same data
-   - Collect `pf.stats()` from each into a side-by-side DataFrame
-   - Print the comparison table
-   - Plot overlaid equity curves for all strategies using Plotly
+   - **Zerodha fees**: `fees=0.00111, fixed_fees=20` for delivery equity
+   - Collect key metrics from each into a side-by-side DataFrame
+   - **Include NIFTY benchmark** in the comparison table (via OpenAlgo `NSE_INDEX`)
+   - **Print Strategy vs Benchmark comparison table**: Total Return, Sharpe, Sortino, Max DD, Win Rate, Trades, Profit Factor
+   - **Explain results** in plain language - which strategy performed best and why
+   - Plot overlaid equity curves for all strategies using Plotly (`template="plotly_dark"`)
    - Save comparison to CSV
 4. Never use icons/emojis in code or logger output
 

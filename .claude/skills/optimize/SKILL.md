@@ -20,21 +20,30 @@ If no arguments, ask the user which strategy to optimize.
 
 ## Instructions
 
-1. Read the vectorbt-expert skill for reference patterns
-2. Create a `.py` file in `D:\QuantFlow 3\Day17\backtesting\` named `{symbol}_{strategy}_optimize.py`
+1. Read the vectorbt-expert skill rules for reference patterns
+2. Create a `.py` file in `backtesting/{strategy_name}/` named `{symbol}_{strategy}_optimize.py`
 3. The script must:
    - Load `.env` and fetch data via OpenAlgo `client.history()`
+   - **Use TA-Lib for ALL indicators** (never VectorBT built-in)
+   - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, etc.)
+   - Use `ta.exrem()` to clean signals (always `.fillna(False)` before exrem)
    - Define sensible parameter ranges for the chosen strategy
-   - Use loop-based optimization (not broadcasting) to collect multiple metrics per combo
+   - Use loop-based optimization to collect multiple metrics per combo
    - Track: total_return, sharpe_ratio, max_drawdown, trade_count for each combination
    - Use `tqdm` for progress bars
-   - Find best parameters by total return AND by minimum drawdown
+   - **Zerodha fees**: `fees=0.00111, fixed_fees=20` for delivery equity
+   - Find best parameters by total return AND by Sharpe ratio
    - Print top 10 results for both criteria
-   - Generate Plotly heatmap of total return across parameter grid
-   - Generate Plotly heatmap of max drawdown across parameter grid
+   - Generate Plotly heatmap of total return across parameter grid (`template="plotly_dark"`)
+   - Generate Plotly heatmap of Sharpe ratio across parameter grid
+   - **Fetch NIFTY benchmark** and compare best parameters vs benchmark
+   - **Print Strategy vs Benchmark comparison table**
+   - **Explain results** in plain language for normal traders
    - Save results to CSV
 4. Never use icons/emojis in code or logger output
-5. For futures symbols, use lot-size-aware sizing
+5. For futures symbols, use lot-size-aware sizing:
+   - NIFTY: `min_size=65, size_granularity=65`
+   - BANKNIFTY: `min_size=30, size_granularity=30`
 
 ## Default Parameter Ranges
 

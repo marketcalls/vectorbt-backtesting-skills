@@ -20,33 +20,51 @@ If no arguments, ask the user which strategy they want.
 
 ## Instructions
 
-1. Read the vectorbt-expert skill for reference patterns
-2. Create a `.py` file in `D:\QuantFlow 3\Day17\backtesting\` named `{symbol}_{strategy}_backtest.py`
-3. The script must:
+1. Read the vectorbt-expert skill rules for reference patterns
+2. Create a `.py` file in `backtesting/{strategy_name}/` named `{symbol}_{strategy}_backtest.py`
+3. Use the matching template from `rules/assets/{strategy}/backtest.py` as the starting point
+4. The script must:
    - Load `.env` from the script directory for OpenAlgo credentials
    - Fetch data via `client.history()` from OpenAlgo
-   - Implement the requested strategy using vectorbt + openalgo.ta helpers
-   - Use `ta.exrem()` to clean duplicate signals
-   - Run `vbt.Portfolio.from_signals()` with proper sizing (percent for equities, value for futures)
+   - **Use TA-Lib for ALL indicators** (EMA, SMA, RSI, MACD, BBands, ATR, ADX, STDDEV, MOM)
+   - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA)
+   - Use `ta.exrem()` to clean duplicate signals (always `.fillna(False)` before exrem)
+   - Run `vbt.Portfolio.from_signals()` with `min_size=1, size_granularity=1`
+   - **Zerodha fees**: `fees=0.00111, fixed_fees=20` for delivery equity
+   - Fetch NIFTY benchmark via OpenAlgo (`symbol="NIFTY", exchange="NSE_INDEX"`)
    - Print full `pf.stats()`
-   - Print key metrics: total return, sharpe, max drawdown, win rate, trade count
-   - Plot equity curve + drawdown (`subplots=['value', 'underwater', 'cum_returns']`)
+   - **Print Strategy vs Benchmark comparison table** (Total Return, Sharpe, Sortino, Max DD, Win Rate, Trades, Profit Factor)
+   - **Explain the backtest report** in plain language for normal traders
+   - Generate QuantStats HTML tearsheet if `quantstats` is available
+   - Plot equity curve + drawdown using Plotly (`template="plotly_dark"`)
    - Export trades to CSV
-4. Never use icons/emojis in code or logger output
-5. For futures symbols (NIFTY, BANKNIFTY), use lot-size-aware sizing with `min_size` and `size_granularity`
+5. Never use icons/emojis in code or logger output
+6. For futures symbols (NIFTY, BANKNIFTY), use lot-size-aware sizing:
+   - NIFTY: `min_size=65, size_granularity=65` (effective 31 Dec 2025)
+   - BANKNIFTY: `min_size=30, size_granularity=30`
+   - Use `fees=0.00018, fixed_fees=20` for F&O futures
 
 ## Available Strategies
 
-| Strategy | Keyword | Description |
-|----------|---------|-------------|
-| EMA Crossover | `ema-crossover` | Fast/slow EMA crossover |
-| RSI | `rsi` | RSI oversold/overbought |
-| Donchian Channel | `donchian` | Donchian channel breakout |
-| Supertrend | `supertrend` | Supertrend indicator signals |
-| MACD Breakout | `macd` | MACD zero-line signal candle breakout |
-| SDA2 | `sda2` | SDA2 trend following channel |
-| Momentum | `momentum` | Double momentum (MOM + MOM of MOM) |
-| Dual Momentum | `dual-momentum` | Relative momentum between 2 ETFs |
+| Strategy | Keyword | Template |
+|----------|---------|----------|
+| EMA Crossover | `ema-crossover` | `assets/ema_crossover/backtest.py` |
+| RSI | `rsi` | `assets/rsi/backtest.py` |
+| Donchian Channel | `donchian` | `assets/donchian/backtest.py` |
+| Supertrend | `supertrend` | `assets/supertrend/backtest.py` |
+| MACD Breakout | `macd` | `assets/macd/backtest.py` |
+| SDA2 | `sda2` | `assets/sda2/backtest.py` |
+| Momentum | `momentum` | `assets/momentum/backtest.py` |
+| Dual Momentum | `dual-momentum` | `assets/dual_momentum/backtest.py` |
+| Buy & Hold | `buy-hold` | `assets/buy_hold/backtest.py` |
+| RSI Accumulation | `rsi-accumulation` | `assets/rsi_accumulation/backtest.py` |
+
+## Benchmark Rules
+
+- Default: NIFTY 50 via OpenAlgo (`symbol="NIFTY", exchange="NSE_INDEX"`)
+- If user specifies a different benchmark, use that instead
+- For yfinance: use `^NSEI` for India, `^GSPC` (S&P 500) for US markets
+- Always compare: Total Return, Sharpe, Sortino, Max Drawdown
 
 ## Example Usage
 

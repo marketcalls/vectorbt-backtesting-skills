@@ -1,6 +1,6 @@
 # VectorBT Backtesting Skills for Claude Code
 
-A collection of Claude Code skills for backtesting trading strategies using VectorBT with Indian market data via OpenAlgo.
+A comprehensive collection of Claude Code skills for backtesting trading strategies using VectorBT. Supports **Indian markets** (OpenAlgo + Zerodha fees), **US markets** (yfinance + IBKR fees), and **Crypto markets** (yfinance/CCXT + Binance fees). Includes TA-Lib indicators, market-specific benchmarking, QuantStats tearsheets, and robustness testing.
 
 ## Quick Install
 
@@ -20,6 +20,7 @@ Install a specific skill only:
 npx skills add marketcalls/vectorbt-backtesting-skills -s backtest
 npx skills add marketcalls/vectorbt-backtesting-skills -s optimize
 npx skills add marketcalls/vectorbt-backtesting-skills -s vectorbt-expert
+npx skills add marketcalls/vectorbt-backtesting-skills -s setup
 ```
 
 List available skills before installing:
@@ -34,13 +35,68 @@ Install globally (available across all projects):
 npx skills add marketcalls/vectorbt-backtesting-skills -g
 ```
 
+## Supported Markets
+
+| Market | Data Source | Fee Model | Default Benchmark |
+|--------|------------|-----------|-------------------|
+| **India** | OpenAlgo (NSE, BSE, NFO, MCX) | Zerodha (4-segment) | NIFTY 50 |
+| **US** | yfinance (NYSE, NASDAQ) | IBKR Pro/Lite | S&P 500 |
+| **Crypto** | yfinance / CCXT (Binance) | Binance (spot + futures) | Bitcoin |
+| **Custom** | Any provider via extensible pattern | User-defined | User-defined |
+
+## Capabilities
+
+### Skills (User-Invocable Commands)
+
+| Command | What It Does |
+|---------|-------------|
+| `/setup` | Detects OS, creates venv, installs TA-Lib + all packages, creates `backtesting/` folders, configures `.env` with API keys |
+| `/backtest` | Generates a complete backtest script with signals, market-specific fees, benchmark comparison, plain-language report, QuantStats tearsheet |
+| `/optimize` | Parameter grid search with TA-Lib indicators, tqdm progress bars, Plotly heatmaps, best params vs benchmark |
+| `/quick-stats` | Inline code block (no file) — fetch data, run EMA crossover, print compact stats + benchmark alpha |
+| `/strategy-compare` | Side-by-side comparison of multiple strategies on same symbol, overlaid equity curves |
+
+### Pre-Built Strategy Templates (12)
+
+| Strategy | Type | Description |
+|----------|------|-------------|
+| EMA Crossover | Trend | EMA 10/20 crossover |
+| RSI | Mean-reversion | RSI(14) oversold/overbought |
+| Donchian Channel | Breakout | Channel breakout with shifted levels (no lookahead) |
+| Supertrend | Trend | Supertrend with intraday session windows (9:30-15:00, exit 15:15) |
+| MACD | Trend + Breakout | MACD zero-line regime + signal-candle breakout |
+| SDA2 | Trend | WMA + STDDEV + ATR band system |
+| Double Momentum | Momentum | MOM + MOM-of-MOM with next-bar fill |
+| Dual Momentum | Rotation | Quarterly ETF rotation (NIFTYBEES vs GOLDBEES) |
+| Buy & Hold | Passive | Static multi-asset allocation with FD benchmark |
+| RSI Accumulation | Accumulation | Weekly RSI slab-wise buying (5%/10%/20% by RSI level) |
+| Walk-Forward | Validation | Rolling train/test optimization with WFE scoring |
+| Realistic Costs | Analysis | Same strategy across 5 fee models (zero to Zerodha delivery) |
+
+### Knowledge Base (20 Rule Files)
+
+| Category | What's Covered |
+|----------|---------------|
+| **Data** | OpenAlgo (India), yfinance (US/Global), CCXT (Crypto), custom providers, `.env` + `python-dotenv`, CSV loading, resampling |
+| **Indicators** | TA-Lib mandatory (EMA, SMA, RSI, MACD, BBands, ATR, ADX, STDDEV, MOM). OpenAlgo ta for Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA |
+| **Signals** | `ta.exrem()` signal cleaning, `ta.crossover()`, `ta.crossunder()`, `ta.flip()` regime detection |
+| **Simulation** | `from_signals`, `from_orders`, `from_holding`, long/short/both directions |
+| **Sizing** | Percent, Value, TargetPercent, whole shares (`min_size=1`), futures lot sizes, fractional crypto |
+| **Costs** | **India**: Zerodha 4-segment (Delivery 0.111%, Intraday 0.0225%, Futures 0.018%, Options 0.098% + Rs 20). **US**: IBKR Pro/Lite (Stocks $0.005/share, Options $0.65/contract, Futures $0.85/contract). **Crypto**: Binance (Spot 0.1%, USDT-M Futures 0.02%/0.05% maker/taker, funding rates) |
+| **Futures** | SEBI revised lot sizes (Dec 2025): NIFTY=65, BANKNIFTY=30, FINNIFTY=60. US: E-mini/Micro contract specs |
+| **Risk** | Stop loss, take profit, trailing stop (`sl_trail`) |
+| **Optimization** | Loop-based (TA-Lib compliant) + broadcasting (vbt.MA exception for parameter sweeps) |
+| **Benchmarking** | India: NIFTY 50 via OpenAlgo. US: S&P 500 (`^GSPC`). Crypto: Bitcoin (`BTC-USD`). Strategy vs Benchmark table always produced |
+| **Reporting** | Plain-language backtest explanation for normal traders. QuantStats HTML tearsheets with 30+ metrics, Monte Carlo simulations |
+| **Plotting** | Plotly dark theme, candlestick with `xaxis type="category"` (no weekend gaps), VectorBT 7-panel plot pack |
+| **Validation** | Walk-forward analysis (WFE ratio), robustness testing (Monte Carlo trade shuffle, noise injection, parameter sensitivity, entry/exit delay, cross-symbol validation) |
+| **Safety** | 10 common pitfalls with prevention, checklist before going live |
+
 ## Prerequisites
 
-### 1. OpenAlgo
+### 1. Data Source Setup
 
-This project uses [OpenAlgo](https://github.com/marketcalls/openalgo) as the primary data source for Indian market historical data (NSE, BSE, NFO, MCX).
-
-**Setup OpenAlgo:**
+**Indian Markets** — requires [OpenAlgo](https://github.com/marketcalls/openalgo):
 
 ```bash
 git clone https://github.com/marketcalls/openalgo.git
@@ -49,35 +105,37 @@ pip install -r requirements.txt
 python app.py
 ```
 
-OpenAlgo runs locally at `http://127.0.0.1:5000` by default. You will need:
-- A broker account connected via OpenAlgo
-- An API key generated from the OpenAlgo dashboard
+OpenAlgo runs locally at `http://127.0.0.1:5000`. You need a broker account connected via OpenAlgo and an API key from the dashboard. See [OpenAlgo documentation](https://docs.openalgo.in/).
 
-Refer to the [OpenAlgo documentation](https://docs.openalgo.in/) for detailed setup instructions.
+**US Markets** — no setup needed. Uses yfinance (public Yahoo Finance data).
 
-### 2. Python Environment
+**Crypto Markets** — no setup needed for public data (yfinance or CCXT). Binance API keys are optional (only for private endpoints).
 
-Create a virtual environment and install the required libraries:
+### 2. Environment Setup
+
+Use the `/setup` skill for automated setup, or manually:
 
 ```bash
 python -m venv venv
+source venv/bin/activate   # Linux/Mac
+# venv\Scripts\activate    # Windows
 
-# Windows
-venv\Scripts\activate
+# Install TA-Lib C library first
+brew install ta-lib         # macOS
+# sudo apt install libta-lib-dev  # Linux
 
-# Linux/Mac
-source venv/bin/activate
-
-pip install openalgo ta-lib vectorbt yfinance nbformat anywidget plotly python-dotenv
+# Install Python packages
+pip install openalgo vectorbt plotly anywidget nbformat ta-lib pandas numpy yfinance python-dotenv tqdm scipy numba ipywidgets quantstats ccxt
 ```
 
-**Note on TA-Lib:** TA-Lib requires a C library to be installed first.
+### 3. Configure API Keys
 
-- **Windows:** Download the `.whl` file from [TA-Lib Unofficial Binaries](https://github.com/cgohlke/talib-build/releases) and install with `pip install TA_Lib-<version>.whl`
-- **Linux:** `sudo apt-get install libta-lib-dev && pip install ta-lib`
-- **Mac:** `brew install ta-lib && pip install ta-lib`
+```bash
+cp .env.sample .env
+# Edit .env with your API keys
+```
 
-### 3. Claude Code
+### 4. Claude Code
 
 Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and run it from the project root directory. The skills will be automatically loaded.
 
@@ -85,102 +143,316 @@ Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and run it
 claude
 ```
 
-## Skills
+## Usage Examples
+
+### `/setup` - Environment Setup
+
+Detects OS, creates venv, installs dependencies, creates folder structure, and collects API keys into `.env`.
+
+```
+/setup
+/setup python3.12
+```
 
 ### `/backtest` - Quick Backtest
 
-Create a complete backtest script for a given strategy and symbol.
+Create a complete backtest script with market-specific fees, benchmark comparison, plain-language report, and QuantStats tearsheet.
 
 ```
+# Indian Markets
 /backtest ema-crossover SBIN NSE D
 /backtest rsi RELIANCE NSE D
 /backtest supertrend NIFTY NFO 5m
-/backtest dual-momentum NIFTYBEES GOLDBEES
-```
 
-**Supported strategies:** EMA Crossover, RSI, Donchian Channel, Supertrend, MACD Breakout, SDA2, Momentum, Dual Momentum
+# US Markets
+/backtest ema-crossover AAPL
+/backtest rsi MSFT
+
+# Crypto Markets
+/backtest ema-crossover BTC-USD
+```
 
 ### `/optimize` - Parameter Optimization
 
-Optimize strategy parameters and generate heatmaps.
+Optimize strategy parameters, generate Plotly heatmaps, and compare best parameters vs benchmark.
 
 ```
 /optimize ema-crossover SBIN NSE D
+/optimize rsi AAPL
 ```
 
 ### `/quick-stats` - Inline Stats
 
-Print key backtest stats without creating a file.
+Print key backtest stats with benchmark comparison without creating a file.
 
 ```
 /quick-stats RELIANCE
+/quick-stats AAPL
+/quick-stats BTC-USD
 ```
 
 ### `/strategy-compare` - Compare Strategies
 
-Compare multiple strategies or directions (long vs short vs both) side-by-side.
+Compare multiple strategies side-by-side with benchmark.
 
 ```
-/strategy-compare ema-crossover rsi SBIN NSE D
+/strategy-compare RELIANCE ema-crossover rsi donchian
+/strategy-compare AAPL ema-crossover rsi macd
 ```
 
-### `vectorbt-expert` - Knowledge Base
+## Key Features
 
-Background skill that provides VectorBT expertise for any backtesting conversation. Loaded automatically when discussing backtesting topics.
+### Multi-Market Transaction Costs
+
+Realistic fee models for each market, auto-selected based on the asset:
+
+#### Indian Markets (Zerodha)
+
+| Segment | `fees` | `fixed_fees` |
+|---------|--------|-------------|
+| Delivery Equity | 0.00111 (0.111%) | Rs 20/order |
+| Intraday Equity | 0.000225 (0.0225%) | Rs 20/order |
+| F&O Futures | 0.00018 (0.018%) | Rs 20/order |
+| F&O Options | 0.00098 (0.098%) | Rs 20/order |
+
+#### US Markets (Interactive Brokers)
+
+| Segment | `fees` | `fixed_fees` |
+|---------|--------|-------------|
+| Stocks (IBKR Pro Fixed) | 0.0001 (0.01%) | $1.00/order |
+| Stocks (IBKR Lite) | 0.00001 (~0.001%) | $0 |
+| Options | 0.002 (0.2%) | $0.65/contract |
+| E-mini Futures (ES, NQ) | 0.000009 (~0.001%) | $2.25/contract |
+| Micro Futures (MES, MNQ) | 0.00002 (~0.002%) | $0.55/contract |
+
+#### Crypto Markets (Binance)
+
+| Segment | `fees` | `fixed_fees` |
+|---------|--------|-------------|
+| Spot (Base) | 0.001 (0.1%) | $0 |
+| Spot (BNB Discount) | 0.00075 (0.075%) | $0 |
+| USDT-M Futures (Taker) | 0.0005 (0.05%) | $0 |
+| USDT-M Futures (Maker) | 0.0002 (0.02%) | $0 |
+| COIN-M Futures (Taker) | 0.0005 (0.05%) | $0 |
+
+### TA-Lib Indicators (Mandatory)
+
+All strategies use TA-Lib for technical indicators. VectorBT built-in indicators are never used.
+
+```python
+import talib as tl
+ema_fast = pd.Series(tl.EMA(close.values, timeperiod=10), index=close.index)
+```
+
+### OpenAlgo TA for Specialty Indicators
+
+Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA — plus signal utilities (exrem, crossover, crossunder, flip).
+
+```python
+from openalgo import ta
+st_line, st_direction = ta.supertrend(high, low, close, period=10, multiplier=3.0)
+entries = ta.exrem(buy_raw.fillna(False), sell_raw.fillna(False))
+```
+
+### Market-Specific Benchmarks
+
+| Market | Default Benchmark | Source |
+|--------|-------------------|--------|
+| India | NIFTY 50 | OpenAlgo (`NSE_INDEX`) |
+| US | S&P 500 | yfinance (`^GSPC` or `SPY`) |
+| Crypto | Bitcoin | yfinance (`BTC-USD`) |
+
+Every backtest produces a Strategy vs Benchmark comparison table.
+
+### QuantStats Tearsheets
+
+Professional HTML reports with 30+ metrics, drawdown analysis, rolling statistics, monthly heatmaps, and Monte Carlo simulations.
+
+```python
+import quantstats as qs
+qs.reports.html(pf.returns(), benchmark="^NSEI", output="tearsheet.html")
+```
+
+### Plain-Language Report Explanation
+
+Every backtest explains results so normal traders can understand:
+
+```
+* Total Return: Your strategy made 45.23% while NIFTY 50 made 32.10%
+  -> BEAT the market by 13.13%
+* Max Drawdown: -12.34% - the biggest drop from peak
+  -> On Rs 10,00,000 capital, worst temporary loss = Rs 1,23,400
+* Sharpe Ratio: 1.45 (return per unit of risk, >1 decent, >2 excellent)
+```
+
+### Extensible Data Providers
+
+Built-in support for OpenAlgo, yfinance, and CCXT. Add custom providers (Alpaca, Twelve Data, etc.) following the pattern in `data-fetching.md`. All API keys stored in `.env` via `python-dotenv`.
+
+### SEBI Revised Lot Sizes (Effective 31 Dec 2025)
+
+| Index | Lot Size | Exchange |
+|-------|----------|----------|
+| Nifty 50 | 65 | NFO |
+| Nifty Bank | 30 | NFO |
+| Nifty Financial Services | 60 | NFO |
+| Nifty Midcap Select | 120 | NFO |
+| Nifty Next 50 | 25 | NFO |
+| BSE Sensex | 20 | BFO |
+| BSE Bankex | 30 | BFO |
+| BSE Sensex 50 | 70 | BFO |
+
+### Backtesting Folder Structure
+
+Strategy name = folder name. Symbol name = file prefix. Each strategy folder is self-contained.
+
+```
+backtesting/
+├── ema_crossover/
+│   ├── .env
+│   ├── SBIN_ema_crossover_backtest.py
+│   ├── SBIN_ema_crossover_trades.csv
+│   ├── SBIN_tearsheet.html
+│   ├── AAPL_ema_crossover_backtest.py
+│   └── AAPL_ema_crossover_trades.csv
+├── rsi/
+│   ├── .env
+│   ├── INFY_rsi_backtest.py
+│   └── ...
+├── supertrend/
+│   └── ...
+└── custom/
+    └── ...
+```
 
 ## Project Structure
 
 ```
 .
 ├── .claude/
-│   └── skills/               # Claude Code skill definitions
-│       ├── backtest/
-│       ├── optimize/
-│       ├── quick-stats/
-│       ├── strategy-compare/
-│       └── vectorbt-expert/
-├── backtesting/               # Generated backtest scripts
-├── requirements.txt
+│   └── skills/
+│       ├── setup/                    # /setup - Environment setup
+│       │   └── SKILL.md
+│       ├── backtest/                 # /backtest - Quick backtest
+│       │   └── SKILL.md
+│       ├── optimize/                 # /optimize - Parameter optimization
+│       │   └── SKILL.md
+│       ├── quick-stats/              # /quick-stats - Inline stats
+│       │   └── SKILL.md
+│       ├── strategy-compare/         # /strategy-compare - Compare strategies
+│       │   └── SKILL.md
+│       └── vectorbt-expert/          # Knowledge base (auto-loaded)
+│           ├── SKILL.md              # Main skill (modular reference hub)
+│           └── rules/                # 20 modular rule files
+│               ├── data-fetching.md
+│               ├── simulation-modes.md
+│               ├── position-sizing.md
+│               ├── indicators-signals.md
+│               ├── openalgo-ta-helpers.md
+│               ├── stop-loss-take-profit.md
+│               ├── parameter-optimization.md
+│               ├── performance-analysis.md
+│               ├── plotting.md
+│               ├── indian-market-costs.md
+│               ├── us-market-costs.md
+│               ├── crypto-market-costs.md
+│               ├── futures-backtesting.md
+│               ├── long-short-trading.md
+│               ├── csv-data-resampling.md
+│               ├── walk-forward.md
+│               ├── robustness-testing.md
+│               ├── pitfalls.md
+│               ├── strategy-catalog.md
+│               ├── quantstats-tearsheet.md
+│               └── assets/           # Production-ready templates
+│                   ├── ema_crossover/backtest.py
+│                   ├── rsi/backtest.py
+│                   ├── donchian/backtest.py
+│                   ├── supertrend/backtest.py
+│                   ├── macd/backtest.py
+│                   ├── sda2/backtest.py
+│                   ├── momentum/backtest.py
+│                   ├── dual_momentum/backtest.py
+│                   ├── buy_hold/backtest.py
+│                   ├── rsi_accumulation/backtest.py
+│                   ├── walk_forward/template.py
+│                   └── realistic_costs/template.py
+├── .env.sample                      # Environment template (copy to .env)
+├── backtesting/                      # Generated backtest scripts (per strategy)
+│   ├── ema_crossover/
+│   ├── rsi/
+│   ├── donchian/
+│   ├── supertrend/
+│   ├── macd/
+│   ├── sda2/
+│   ├── momentum/
+│   ├── dual_momentum/
+│   ├── buy_hold/
+│   ├── rsi_accumulation/
+│   ├── walk_forward/
+│   └── custom/
 └── README.md
 ```
 
-## Example Backtesting Scripts
+## Rule Files Reference
 
-The `backtesting/` directory contains example scripts generated by the skills:
-
-| Script | Strategy | Description |
-|--------|----------|-------------|
-| `SBIN_ema_crossover_backtest.py` | EMA 10/20 Crossover | Simple moving average crossover on SBIN |
-| `dual_momentum_backtest.py` | Dual Momentum | Quarterly rotation between NIFTYBEES and GOLDBEES |
-| `buy_hold_75_25_backtest.py` | Buy & Hold 60/40 | Static allocation NIFTYBEES + GOLDBEES |
-| `niftybees_rsi_accumulation_backtest.py` | RSI Accumulation | Slab-wise weekly accumulation based on NIFTY RSI |
-
-Each script:
-- Fetches data from OpenAlgo
-- Implements the strategy with VectorBT
-- Prints performance stats and CAGR benchmarks (vs NIFTY 50, FD)
-- Generates interactive Plotly charts
-- Exports trade logs to CSV
+| Rule File | Description |
+|-----------|-------------|
+| `data-fetching.md` | OpenAlgo (India), yfinance (US), CCXT (Crypto), custom providers, `.env` setup |
+| `simulation-modes.md` | from_signals, from_orders, from_holding, direction types |
+| `position-sizing.md` | Amount/Value/Percent/TargetPercent sizing, whole shares |
+| `indicators-signals.md` | TA-Lib mandatory indicator reference, signal generation |
+| `openalgo-ta-helpers.md` | OpenAlgo ta: exrem, crossover, Supertrend, Donchian, Ichimoku, MAs |
+| `stop-loss-take-profit.md` | Fixed SL, TP, trailing stop configurations |
+| `parameter-optimization.md` | Broadcasting and loop-based optimization, heatmaps |
+| `performance-analysis.md` | Stats, metrics, benchmark comparison, CAGR calculation |
+| `plotting.md` | Candlestick (category x-axis), VectorBT plots, custom Plotly |
+| `indian-market-costs.md` | Zerodha fee model by segment with detailed breakdown |
+| `us-market-costs.md` | IBKR fee model — US stocks, options, futures (Fixed/Tiered, SEC, FINRA TAF) |
+| `crypto-market-costs.md` | Binance fee model — spot, USDT-M/COIN-M futures, funding rates, VIP tiers |
+| `futures-backtesting.md` | SEBI revised lot sizes (Dec 2025), US contract specs, value sizing |
+| `long-short-trading.md` | Simultaneous long/short, direction comparison |
+| `csv-data-resampling.md` | Loading CSV data, resampling with Indian market alignment |
+| `walk-forward.md` | Walk-forward analysis, WFE ratio, rolling optimization |
+| `robustness-testing.md` | Monte Carlo, noise test, parameter sensitivity, delay test |
+| `pitfalls.md` | 10 common mistakes and checklist before going live |
+| `strategy-catalog.md` | All strategy types with code snippets and asset references |
+| `quantstats-tearsheet.md` | QuantStats HTML reports, 30+ metrics, Monte Carlo |
 
 ## Data Sources
 
-| Source | Use Case | Exchange Codes |
-|--------|----------|----------------|
-| OpenAlgo | Indian markets (primary) | NSE, BSE, NFO, MCX, NSE_INDEX |
-| Yahoo Finance | Global markets (alternative) | Standard Yahoo tickers |
+| Source | Use Case | Tickers/Codes | API Key Required |
+|--------|----------|---------------|------------------|
+| OpenAlgo | Indian markets (primary) | NSE, BSE, NFO, BFO, CDS, MCX, NSE_INDEX, BSE_INDEX | Yes (`OPENALGO_API_KEY`) |
+| yfinance | US markets, global, crypto | `AAPL`, `SPY`, `^GSPC`, `^NSEI`, `BTC-USD`, `ETH-USD` | No |
+| CCXT | Crypto exchanges (Binance, etc.) | `BTC/USDT`, `ETH/USDT` (higher resolution data) | Optional |
+| Custom | Any provider | User-defined | User-defined |
 
 ## Configuration
 
-Backtest scripts read the OpenAlgo API key from:
-1. Environment variable `OPENALGO_API_KEY`
-2. Or hardcoded in the script (update before running)
+Copy the `.env.sample` and fill in your API keys:
 
-```python
-client = api(
-    api_key=os.getenv("OPENALGO_API_KEY", "your-api-key-here"),
-    host=os.getenv("OPENALGO_HOST", "http://127.0.0.1:5000"),
-)
+```bash
+cp .env.sample .env
 ```
+
+The `.env` file supports:
+
+```
+# Indian Markets (OpenAlgo)
+OPENALGO_API_KEY=your_openalgo_api_key_here
+OPENALGO_HOST=http://127.0.0.1:5000
+
+# Crypto Markets (Binance via CCXT) - Optional
+BINANCE_API_KEY=
+BINANCE_SECRET_KEY=
+
+# Custom Data Providers - add your own keys
+# ALPACA_API_KEY=
+# TWELVEDATA_API_KEY=
+```
+
+US market data via yfinance does not require an API key.
 
 ## License
 
