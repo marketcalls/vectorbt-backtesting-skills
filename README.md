@@ -2,7 +2,7 @@
 
 A comprehensive collection of backtesting skills for trading strategies using VectorBT. Works with **40+ AI coding agents** via [skills.sh](https://github.com/vercel-labs/skills) — including Claude Code, Cursor, Codex, OpenCode, Cline, Windsurf, GitHub Copilot, Gemini CLI, Roo Code, and more.
 
-Supports **Indian markets** (OpenAlgo + Zerodha fees), **US markets** (yfinance + IBKR fees), and **Crypto markets** (yfinance/CCXT + Binance fees). Includes TA-Lib indicators, market-specific benchmarking, QuantStats tearsheets, and robustness testing.
+Supports **Indian markets**, **US markets**, and **Crypto markets** with realistic transaction cost modeling, TA-Lib indicators, market-specific benchmarking, QuantStats tearsheets, and robustness testing. Broker-neutral by design — fee models use industry-standard references that can be customized for any broker.
 
 ## Quick Install
 
@@ -58,12 +58,14 @@ The `npx skills add` command detects which agents you have installed and places 
 
 ## Supported Markets
 
-| Market | Data Source | Fee Model | Default Benchmark |
-|--------|------------|-----------|-------------------|
-| **India** | OpenAlgo (NSE, BSE, NFO, MCX) | Zerodha (4-segment) | NIFTY 50 |
-| **US** | yfinance (NYSE, NASDAQ) | IBKR Pro/Lite | S&P 500 |
-| **Crypto** | yfinance / CCXT (Binance) | Binance (spot + futures) | Bitcoin |
+| Market | Data Source | Fee Reference | Default Benchmark |
+|--------|------------|---------------|-------------------|
+| **India** | OpenAlgo (NSE, BSE, NFO, MCX) | Delivery, Intraday, F&O (4-segment) | NIFTY 50 |
+| **US** | yfinance (NYSE, NASDAQ) | Stocks, Options, Futures (per-share + per-contract) | S&P 500 |
+| **Crypto** | yfinance / CCXT | Spot, Perpetual Futures (maker/taker) | Bitcoin |
 | **Custom** | Any provider via extensible pattern | User-defined | User-defined |
+
+> **Broker-neutral**: Fee models are based on standard industry references (Zerodha for India, IBKR for US, Binance for Crypto) and can be adjusted for any broker by changing the `fees` and `fixed_fees` constants.
 
 ## Capabilities
 
@@ -92,7 +94,7 @@ The `npx skills add` command detects which agents you have installed and places 
 | Buy & Hold | Passive | Static multi-asset allocation with FD benchmark |
 | RSI Accumulation | Accumulation | Weekly RSI slab-wise buying (5%/10%/20% by RSI level) |
 | Walk-Forward | Validation | Rolling train/test optimization with WFE scoring |
-| Realistic Costs | Analysis | Same strategy across 5 fee models (zero to Zerodha delivery) |
+| Realistic Costs | Analysis | Same strategy across 5 fee tiers (zero to full delivery) |
 
 ### Knowledge Base (20 Rule Files)
 
@@ -103,7 +105,7 @@ The `npx skills add` command detects which agents you have installed and places 
 | **Signals** | `ta.exrem()` signal cleaning, `ta.crossover()`, `ta.crossunder()`, `ta.flip()` regime detection |
 | **Simulation** | `from_signals`, `from_orders`, `from_holding`, long/short/both directions |
 | **Sizing** | Percent, Value, TargetPercent, whole shares (`min_size=1`), futures lot sizes, fractional crypto |
-| **Costs** | **India**: Zerodha 4-segment (Delivery 0.111%, Intraday 0.0225%, Futures 0.018%, Options 0.098% + Rs 20). **US**: IBKR Pro/Lite (Stocks $0.005/share, Options $0.65/contract, Futures $0.85/contract). **Crypto**: Binance (Spot 0.1%, USDT-M Futures 0.02%/0.05% maker/taker, funding rates) |
+| **Costs** | **India**: 4-segment model (Delivery 0.111%, Intraday 0.0225%, Futures 0.018%, Options 0.098%). **US**: Per-share + per-contract model (Stocks ~0.01%, Options ~0.2%, Futures ~0.001%). **Crypto**: Maker/taker model (Spot 0.1%, Futures 0.02%/0.05%, funding rates). All customizable. |
 | **Futures** | SEBI revised lot sizes (Dec 2025): NIFTY=65, BANKNIFTY=30, FINNIFTY=60. US: E-mini/Micro contract specs |
 | **Risk** | Stop loss, take profit, trailing stop (`sl_trail`) |
 | **Optimization** | Loop-based (TA-Lib compliant) + broadcasting (vbt.MA exception for parameter sweeps) |
@@ -148,7 +150,7 @@ OpenAlgo runs locally at `http://127.0.0.1:5000`. You need a broker account conn
 
 **US Markets** — no setup needed. Uses yfinance (public Yahoo Finance data).
 
-**Crypto Markets** — no setup needed for public data (yfinance or CCXT). Binance API keys are optional (only for private endpoints).
+**Crypto Markets** — no setup needed for public data (yfinance or CCXT). Exchange API keys are optional (only for private endpoints).
 
 ### 3. Python Environment Setup
 
@@ -235,9 +237,9 @@ Compare multiple strategies side-by-side with benchmark.
 
 ### Multi-Market Transaction Costs
 
-Realistic fee models for each market, auto-selected based on the asset:
+Realistic fee models for each market, auto-selected based on the asset. All fee constants are configurable — adjust for your broker by changing the `fees` and `fixed_fees` values.
 
-#### Indian Markets (Zerodha)
+#### Indian Market Fees (Reference: Zerodha)
 
 | Segment | `fees` | `fixed_fees` |
 |---------|--------|-------------|
@@ -246,25 +248,27 @@ Realistic fee models for each market, auto-selected based on the asset:
 | F&O Futures | 0.00018 (0.018%) | Rs 20/order |
 | F&O Options | 0.00098 (0.098%) | Rs 20/order |
 
-#### US Markets (Interactive Brokers)
+#### US Market Fees (Reference: IBKR)
 
 | Segment | `fees` | `fixed_fees` |
 |---------|--------|-------------|
-| Stocks (IBKR Pro Fixed) | 0.0001 (0.01%) | $1.00/order |
-| Stocks (IBKR Lite) | 0.00001 (~0.001%) | $0 |
+| Stocks (Pro/Fixed) | 0.0001 (0.01%) | $1.00/order |
+| Stocks (Commission-Free) | 0.00001 (~0.001%) | $0 |
 | Options | 0.002 (0.2%) | $0.65/contract |
 | E-mini Futures (ES, NQ) | 0.000009 (~0.001%) | $2.25/contract |
 | Micro Futures (MES, MNQ) | 0.00002 (~0.002%) | $0.55/contract |
 
-#### Crypto Markets (Binance)
+#### Crypto Market Fees (Reference: Binance)
 
 | Segment | `fees` | `fixed_fees` |
 |---------|--------|-------------|
 | Spot (Base) | 0.001 (0.1%) | $0 |
-| Spot (BNB Discount) | 0.00075 (0.075%) | $0 |
+| Spot (Discounted) | 0.00075 (0.075%) | $0 |
 | USDT-M Futures (Taker) | 0.0005 (0.05%) | $0 |
 | USDT-M Futures (Maker) | 0.0002 (0.02%) | $0 |
 | COIN-M Futures (Taker) | 0.0005 (0.05%) | $0 |
+
+> **Using a different broker?** Simply override the fee constants in your backtest script. The rule files include detailed breakdowns (STT, exchange fees, regulatory fees, clearing fees) so you can recalculate for any broker.
 
 ### TA-Lib Indicators (Mandatory)
 
@@ -438,9 +442,9 @@ backtesting/
 | `parameter-optimization.md` | Broadcasting and loop-based optimization, heatmaps |
 | `performance-analysis.md` | Stats, metrics, benchmark comparison, CAGR calculation |
 | `plotting.md` | Candlestick (category x-axis), VectorBT plots, custom Plotly |
-| `indian-market-costs.md` | Zerodha fee model by segment with detailed breakdown |
-| `us-market-costs.md` | IBKR fee model — US stocks, options, futures (Fixed/Tiered, SEC, FINRA TAF) |
-| `crypto-market-costs.md` | Binance fee model — spot, USDT-M/COIN-M futures, funding rates, VIP tiers |
+| `indian-market-costs.md` | Indian market fee model — delivery, intraday, F&O (reference: Zerodha) |
+| `us-market-costs.md` | US market fee model — stocks, options, futures (reference: IBKR) |
+| `crypto-market-costs.md` | Crypto fee model — spot, perpetual futures, funding rates (reference: Binance) |
 | `futures-backtesting.md` | SEBI revised lot sizes (Dec 2025), US contract specs, value sizing |
 | `long-short-trading.md` | Simultaneous long/short, direction comparison |
 | `csv-data-resampling.md` | Loading CSV data, resampling with Indian market alignment |
@@ -456,7 +460,7 @@ backtesting/
 |--------|----------|---------------|------------------|
 | OpenAlgo | Indian markets (primary) | NSE, BSE, NFO, BFO, CDS, MCX, NSE_INDEX, BSE_INDEX | Yes (`OPENALGO_API_KEY`) |
 | yfinance | US markets, global, crypto | `AAPL`, `SPY`, `^GSPC`, `^NSEI`, `BTC-USD`, `ETH-USD` | No |
-| CCXT | Crypto exchanges (Binance, etc.) | `BTC/USDT`, `ETH/USDT` (higher resolution data) | Optional |
+| CCXT | Crypto exchanges | `BTC/USDT`, `ETH/USDT` (higher resolution data) | Optional |
 | Custom | Any provider | User-defined | User-defined |
 
 ## Configuration
@@ -474,7 +478,7 @@ The `.env` file supports:
 OPENALGO_API_KEY=your_openalgo_api_key_here
 OPENALGO_HOST=http://127.0.0.1:5000
 
-# Crypto Markets (Binance via CCXT) - Optional
+# Crypto Markets (CCXT) - Optional
 BINANCE_API_KEY=
 BINANCE_SECRET_KEY=
 
