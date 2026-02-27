@@ -1,10 +1,12 @@
-# VectorBT Backtesting Skills for Claude Code
+# VectorBT Backtesting Skills for Agentic Coding Tools
 
-A comprehensive collection of Claude Code skills for backtesting trading strategies using VectorBT. Supports **Indian markets** (OpenAlgo + Zerodha fees), **US markets** (yfinance + IBKR fees), and **Crypto markets** (yfinance/CCXT + Binance fees). Includes TA-Lib indicators, market-specific benchmarking, QuantStats tearsheets, and robustness testing.
+A comprehensive collection of backtesting skills for trading strategies using VectorBT. Works with **40+ AI coding agents** via [skills.sh](https://github.com/vercel-labs/skills) — including Claude Code, Cursor, Codex, OpenCode, Cline, Windsurf, GitHub Copilot, Gemini CLI, Roo Code, and more.
+
+Supports **Indian markets** (OpenAlgo + Zerodha fees), **US markets** (yfinance + IBKR fees), and **Crypto markets** (yfinance/CCXT + Binance fees). Includes TA-Lib indicators, market-specific benchmarking, QuantStats tearsheets, and robustness testing.
 
 ## Quick Install
 
-Install the skills directly into your project using [npx skills](https://github.com/vercel-labs/skills):
+Install the skills into your project using [npx skills](https://github.com/vercel-labs/skills). The CLI auto-detects your AI coding agent and installs skills to the correct directory.
 
 ```bash
 # GitHub shorthand
@@ -34,6 +36,25 @@ Install globally (available across all projects):
 ```bash
 npx skills add marketcalls/vectorbt-backtesting-skills -g
 ```
+
+### Supported AI Coding Agents
+
+Skills are installed via [skills.sh](https://github.com/vercel-labs/skills) which supports 40+ agents. Each agent reads skills from its own directory:
+
+| Agent | Skills Directory |
+|-------|-----------------|
+| Claude Code | `.claude/skills/` |
+| Cursor | `.agents/skills/` |
+| Codex | `.agents/skills/` |
+| OpenCode | `.agents/skills/` |
+| Cline | `.agents/skills/` |
+| Windsurf | `.agents/skills/` |
+| GitHub Copilot | `.agents/skills/` |
+| Gemini CLI | `.agents/skills/` |
+| Roo Code | `.agents/skills/` |
+| + 30 more | Auto-detected by `npx skills` |
+
+The `npx skills add` command detects which agents you have installed and places the skill files in the correct paths automatically.
 
 ## Supported Markets
 
@@ -94,7 +115,25 @@ npx skills add marketcalls/vectorbt-backtesting-skills -g
 
 ## Prerequisites
 
-### 1. Data Source Setup
+### 1. AI Coding Agent
+
+Install any supported AI coding agent. For example:
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) — `npm install -g @anthropic-ai/claude-code`
+- [Cursor](https://cursor.com) — Desktop IDE with built-in AI
+- [Codex](https://github.com/openai/codex) — `npm install -g @openai/codex`
+- [OpenCode](https://github.com/opencode-ai/opencode) — `go install github.com/opencode-ai/opencode@latest`
+- [Cline](https://github.com/cline/cline) — VS Code extension
+- [Windsurf](https://windsurf.com) — Desktop IDE with AI
+- Or any of the [40+ supported agents](https://github.com/vercel-labs/skills)
+
+Then install the skills:
+
+```bash
+npx skills add marketcalls/vectorbt-backtesting-skills
+```
+
+### 2. Data Source Setup
 
 **Indian Markets** — requires [OpenAlgo](https://github.com/marketcalls/openalgo):
 
@@ -111,7 +150,7 @@ OpenAlgo runs locally at `http://127.0.0.1:5000`. You need a broker account conn
 
 **Crypto Markets** — no setup needed for public data (yfinance or CCXT). Binance API keys are optional (only for private endpoints).
 
-### 2. Environment Setup
+### 3. Python Environment Setup
 
 Use the `/setup` skill for automated setup, or manually:
 
@@ -128,19 +167,11 @@ brew install ta-lib         # macOS
 pip install openalgo vectorbt plotly anywidget nbformat ta-lib pandas numpy yfinance python-dotenv tqdm scipy numba ipywidgets quantstats ccxt
 ```
 
-### 3. Configure API Keys
+### 4. Configure API Keys
 
 ```bash
 cp .env.sample .env
 # Edit .env with your API keys
-```
-
-### 4. Claude Code
-
-Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and run it from the project root directory. The skills will be automatically loaded.
-
-```bash
-claude
 ```
 
 ## Usage Examples
