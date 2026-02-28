@@ -325,9 +325,9 @@ fig.add_hline(y=RSI_BUY_THRESHOLD, line_dash="dash", line_color="#00d4aa",
 fig.add_hline(y=RSI_EXIT_THRESHOLD, line_dash="dash", line_color="#ff4444",
               annotation_text=f"Exit > {RSI_EXIT_THRESHOLD}", row=3, col=1)
 
-fig.update_yaxes(tickformat=",", row=1, col=1)
-fig.update_yaxes(tickformat=".1%", row=2, col=1)
-fig.update_yaxes(title_text="RSI", row=3, col=1)
+fig.update_yaxes(tickformat=",", side="right", row=1, col=1)
+fig.update_yaxes(tickformat=".1%", side="right", row=2, col=1)
+fig.update_yaxes(title_text="RSI", side="right", row=3, col=1)
 fig.update_layout(
     template="plotly_dark",
     title=f"RSI Accumulation: Buy NIFTYBEES Fri 3:15 PM (RSI<{RSI_BUY_THRESHOLD}), Exit (RSI>{RSI_EXIT_THRESHOLD})",
@@ -365,6 +365,7 @@ fig2.update_layout(
     showlegend=True,
     legend=dict(x=0.01, y=0.99),
 )
+fig2.update_yaxes(side="right")
 fig2.show()
 
 # --- Export ---

@@ -207,6 +207,7 @@ fig.update_layout(
     height=600,
     legend=dict(x=0.01, y=0.99),
 )
+fig.update_yaxes(side="right")
 fig.show()
 
 # --- Export ---

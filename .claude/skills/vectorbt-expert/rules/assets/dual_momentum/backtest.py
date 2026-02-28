@@ -179,8 +179,8 @@ fig.add_trace(go.Scatter(x=cum_nifty.index, y=cum_nifty * 100,
 fig.add_trace(go.Scatter(x=drawdown.index, y=drawdown * 100,
     name="Drawdown", fill="tozeroy", line=dict(color="#ff4444", width=1)), row=2, col=1)
 
-fig.update_yaxes(ticksuffix="%", row=1, col=1)
-fig.update_yaxes(title_text="Drawdown %", ticksuffix="%", row=2, col=1)
+fig.update_yaxes(ticksuffix="%", side="right", row=1, col=1)
+fig.update_yaxes(title_text="Drawdown %", ticksuffix="%", side="right", row=2, col=1)
 fig.update_layout(template="plotly_dark",
     title="Dual Momentum vs NIFTY 50", height=700)
 fig.show()

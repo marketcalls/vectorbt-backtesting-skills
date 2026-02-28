@@ -217,8 +217,8 @@ fig.add_trace(go.Scatter(
 
 fig.update_layout(template="plotly_dark", title="Walk-Forward Analysis Results",
                   height=600, showlegend=True)
-fig.update_yaxes(title_text="Return %", ticksuffix="%", row=1, col=1)
-fig.update_yaxes(title_text="Cumulative %", ticksuffix="%", row=2, col=1)
+fig.update_yaxes(title_text="Return %", ticksuffix="%", side="right", row=1, col=1)
+fig.update_yaxes(title_text="Cumulative %", ticksuffix="%", side="right", row=2, col=1)
 fig.update_xaxes(title_text="Window #", row=2, col=1)
 fig.show()
 

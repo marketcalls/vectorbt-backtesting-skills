@@ -255,11 +255,11 @@ fig.add_trace(go.Scatter(
     line=dict(color="#aa88ff", width=2, shape="hv"),
 ), row=3, col=1)
 
-fig.update_yaxes(tickformat=".1%", row=1, col=1)
-fig.update_yaxes(tickformat=".1%", row=2, col=1)
+fig.update_yaxes(tickformat=".1%", side="right", row=1, col=1)
+fig.update_yaxes(tickformat=".1%", side="right", row=2, col=1)
 fig.update_yaxes(
     tickvals=[0, 1], ticktext=["GOLDBEES", "NIFTYBEES"],
-    row=3, col=1,
+    side="right", row=3, col=1,
 )
 
 fig.update_layout(
@@ -293,6 +293,7 @@ fig2.update_layout(
     showlegend=True,
     legend=dict(x=0.01, y=0.99),
 )
+fig2.update_yaxes(side="right")
 fig2.show()
 
 # --- Export ---
