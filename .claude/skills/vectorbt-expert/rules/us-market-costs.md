@@ -1,13 +1,13 @@
 ---
 name: us-market-costs
-description: Realistic US market transaction cost modeling based on Interactive Brokers (IBKR) - commission, SEC fee, FINRA TAF, exchange fees
+description: Realistic US market transaction cost modeling - commission, SEC fee, FINRA TAF, exchange fees
 metadata:
-  tags: fees, costs, ibkr, interactive-brokers, us-market, sec, finra, commission, stocks, options, futures
+  tags: fees, costs, us-market, sec, finra, commission, stocks, options, futures
 ---
 
-# US Market Transaction Costs (Interactive Brokers Standard)
+# US Market Transaction Costs
 
-All fee calculations are based on IBKR Pro Fixed pricing. IBKR is the reference broker for US market backtesting due to transparent, low-cost pricing with direct market access.
+All fee calculations are based on standard US brokerage pricing with per-share commission and regulatory fees.
 
 ## Fee Summary by Segment
 
@@ -23,7 +23,7 @@ All fee calculations are based on IBKR Pro Fixed pricing. IBKR is the reference 
 
 VectorBT's `fees` parameter is a percentage applied to both buy and sell turnover. We convert the total round-trip cost into an equivalent per-side percentage.
 
-### US Stocks - IBKR Pro Fixed
+### US Stocks - Per-Share Commission
 
 Total all-in cost for a $10,000 trade (100 shares × $100):
 - Commission: $0.005 × 100 = $0.50 → min $1.00
@@ -33,7 +33,7 @@ Total all-in cost for a $10,000 trade (100 shares × $100):
 - Per side: ~0.01% of trade value
 
 ```python
-# US Stocks (IBKR Pro Fixed): ~0.01% fees + $1 fixed per order
+# US Stocks (Per-Share Commission): ~0.01% fees + $1 fixed per order
 fees = 0.0001            # 0.01% per side (SEC + FINRA regulatory)
 fixed_fees = 1.0         # $1 minimum commission per order
 
@@ -48,13 +48,13 @@ pf = vbt.Portfolio.from_signals(
 )
 ```
 
-### US Stocks - IBKR Lite (Commission-Free)
+### US Stocks - Commission-Free
 
 Commission-free for US exchange-listed stocks and ETFs during regular trading hours.
 Only regulatory fees (SEC + FINRA TAF) apply.
 
 ```python
-# US Stocks (IBKR Lite): ~0.001% fees, no fixed fees
+# US Stocks (Commission-Free): ~0.001% fees, no fixed fees
 fees = 0.00001           # ~0.001% per side (SEC + FINRA only)
 fixed_fees = 0           # No commission
 
@@ -71,11 +71,11 @@ pf = vbt.Portfolio.from_signals(
 
 ### US Options
 
-Per-contract pricing. IBKR Pro Fixed: $0.65/contract + exchange + clearing + regulatory.
+Per-contract pricing. Standard: $0.65/contract + exchange + clearing + regulatory.
 Total all-in: ~$1.00–$1.50 per contract depending on exchange.
 
 ```python
-# US Options (IBKR Pro Fixed): ~0.5% fees + $0.65 fixed per order
+# US Options (Per-Contract Commission): ~0.5% fees + $0.65 fixed per order
 # Note: Options fees are high relative to premium price.
 # For a $5.00 premium × 100 shares = $500 notional:
 #   Commission: $0.65, Exchange: ~$0.30, OCC: $0.02, Regulatory: ~$0.01
@@ -95,7 +95,7 @@ pf = vbt.Portfolio.from_signals(
 ### US Futures - E-mini (ES, NQ, YM, RTY)
 
 Per-contract pricing. All-in cost for 1 ES contract:
-IBKR execution $0.85 + CME exchange $1.38 + Regulatory $0.02 = $2.25
+Execution $0.85 + CME exchange $1.38 + Regulatory $0.02 = $2.25
 
 ```python
 # US Futures E-mini: ~$2.25 all-in per contract per side
@@ -142,16 +142,16 @@ pf = vbt.Portfolio.from_signals(
 Use these constants at the top of every US market backtest script:
 
 ```python
-# --- Fee Constants (IBKR Standard) ---
-# US Stocks - IBKR Pro Fixed
+# --- Fee Constants (US Market Standard) ---
+# US Stocks - Per-Share Commission
 FEES_US_STOCK_PRO = 0.0001           # 0.01% per side (regulatory)
 FIXED_FEES_US_STOCK_PRO = 1.0        # $1.00 minimum per order
 
-# US Stocks - IBKR Lite (commission-free)
+# US Stocks - Commission-Free
 FEES_US_STOCK_LITE = 0.00001         # ~0.001% per side (regulatory only)
 FIXED_FEES_US_STOCK_LITE = 0         # No commission
 
-# US Options - IBKR Pro Fixed
+# US Options - Per-Contract Commission
 FEES_US_OPTIONS = 0.002              # ~0.2% per side (exchange + clearing)
 FIXED_FEES_US_OPTIONS = 0.65         # $0.65 per contract
 
@@ -215,11 +215,11 @@ benchmark = yf.download("^GSPC", start="2022-01-01", end="2025-01-01", interval=
 
 ## Best Practices
 
-- For US stock backtests with IBKR Pro, the $1 minimum commission dominates costs for small trades
+- For US stock backtests with per-share commission, the $1 minimum commission dominates costs for small trades
 - For large trades (>200 shares of $100+ stocks), per-share commission becomes significant
-- IBKR Lite is effectively commission-free for stocks but still has regulatory fees
+- Commission-free brokers are effectively zero-cost for stocks but still have regulatory fees
 - US futures costs are extremely low as a percentage of notional - ideal for high-frequency strategies
 - Options costs are relatively high as a percentage of premium - factor this into spread strategies
-- When in doubt, use IBKR Pro Fixed pricing as a conservative baseline
+- When in doubt, use per-share commission pricing as a conservative baseline
 - Always use `min_size=1, size_granularity=1` for stocks to avoid fractional shares
 - Default US benchmark: S&P 500 via `^GSPC` (index) or `SPY` (ETF) from yfinance

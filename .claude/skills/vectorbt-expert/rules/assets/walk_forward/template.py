@@ -2,7 +2,7 @@
 Walk-Forward Analysis Template - VectorBT + OpenAlgo
 Optimizes EMA parameters on in-sample, validates on out-of-sample, rolls forward.
 Indicators: TA-Lib exclusively.
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 """
 
 import os
@@ -27,7 +27,7 @@ SYMBOL = "SBIN"
 EXCHANGE = "NSE"
 INTERVAL = "D"
 INIT_CASH = 1_000_000
-FEES = 0.00111              # Zerodha delivery equity
+FEES = 0.00111              # Indian delivery equity
 FIXED_FEES = 20
 ALLOCATION = 0.75
 

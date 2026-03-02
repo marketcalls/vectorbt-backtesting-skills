@@ -2,7 +2,7 @@
 RSI Backtest - VectorBT + OpenAlgo
 Strategy: Buy when RSI crosses below oversold, sell when RSI crosses above overbought.
 Indicators: TA-Lib RSI exclusively.
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 
@@ -28,7 +28,7 @@ RSI_PERIOD = 14
 RSI_OVERSOLD = 30
 RSI_OVERBOUGHT = 70
 INIT_CASH = 1_000_000
-FEES = 0.00111              # Zerodha delivery equity
+FEES = 0.00111              # Indian delivery equity
 FIXED_FEES = 20             # Rs 20 per order
 ALLOCATION = 0.75
 BENCHMARK_SYMBOL = "NIFTY"

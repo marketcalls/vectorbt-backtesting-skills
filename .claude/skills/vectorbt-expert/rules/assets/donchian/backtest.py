@@ -2,7 +2,7 @@
 Donchian Channel Breakout Backtest - VectorBT + OpenAlgo
 Strategy: Buy when price breaks above N-period high, sell when breaks below N-period low.
 Indicators: openalgo.ta.donchian (shifted by 1 to avoid lookahead).
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 

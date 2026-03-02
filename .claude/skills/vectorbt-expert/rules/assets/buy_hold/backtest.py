@@ -2,7 +2,7 @@
 Buy & Hold Portfolio Backtest - VectorBT + OpenAlgo
 Strategy: Static allocation across ETFs (e.g., 60% NIFTYBEES + 40% GOLDBEES).
           One-time purchase on Day 1, hold forever.
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX) + HDFC FD rate.
 """
 
@@ -27,7 +27,7 @@ WEIGHTS = {"NIFTYBEES": 0.60, "GOLDBEES": 0.40}
 EXCHANGE = "NSE"
 INTERVAL = "D"
 INIT_CASH = 10_00_000
-FEES = 0.00111              # Zerodha delivery equity
+FEES = 0.00111              # Indian delivery equity
 FIXED_FEES = 20             # Rs 20 per order
 FD_CAGR = 0.0645            # HDFC Bank FD rate 6.45%
 BENCHMARK_SYMBOL = "NIFTY"

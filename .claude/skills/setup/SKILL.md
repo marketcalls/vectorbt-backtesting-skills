@@ -121,15 +121,15 @@ Do NOT pre-create strategy subfolders.
 **6b. Ask the user which markets they will be backtesting** using AskUserQuestion:
 - Indian Markets (OpenAlgo) — requires OpenAlgo API key
 - US Markets (yfinance) — no API key needed
-- Crypto Markets (Binance/CCXT) — optional API key for private data
+- Crypto Markets (CCXT) — optional API key for private data
 
 **6c. If the user selected Indian Markets**, ask for their OpenAlgo API key:
 - Ask: "Enter your OpenAlgo API key (from the OpenAlgo dashboard):"
 - If the user provides a key, store it in `.env`
 - If the user skips, write a placeholder
 
-**6d. If the user selected Crypto Markets**, ask if they want to configure Binance API keys:
-- Ask: "Do you have Binance API keys for authenticated data? (Optional — public OHLCV data works without keys)"
+**6d. If the user selected Crypto Markets**, ask if they want to configure exchange API keys:
+- Ask: "Do you have exchange API keys for authenticated data? (Optional — public OHLCV data works without keys)"
 - If yes, ask for API key and secret key, store in `.env`
 - If no, leave them blank in `.env`
 
@@ -140,9 +140,9 @@ Do NOT pre-create strategy subfolders.
 OPENALGO_API_KEY={user_provided_key or "your_openalgo_api_key_here"}
 OPENALGO_HOST=http://127.0.0.1:5000
 
-# Crypto Markets (Binance via CCXT) - Optional
-BINANCE_API_KEY={user_provided_key or ""}
-BINANCE_SECRET_KEY={user_provided_key or ""}
+# Crypto Markets (CCXT) - Optional
+CRYPTO_API_KEY={user_provided_key or ""}
+CRYPTO_SECRET_KEY={user_provided_key or ""}
 ```
 
 **6f. Add `.env` to `.gitignore`** if it exists (never commit secrets):

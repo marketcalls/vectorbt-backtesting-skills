@@ -2,7 +2,7 @@
 EMA Crossover Backtest - VectorBT + OpenAlgo
 Strategy: Buy when Fast EMA crosses above Slow EMA, sell on cross below.
 Indicators: TA-Lib EMA exclusively.
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 
@@ -27,7 +27,7 @@ INTERVAL = "D"
 FAST_EMA = 10
 SLOW_EMA = 20
 INIT_CASH = 1_000_000
-FEES = 0.00111              # 0.111% per side (Zerodha delivery: STT + statutory)
+FEES = 0.00111              # 0.111% per side (Indian delivery: STT + statutory)
 FIXED_FEES = 20             # Rs 20 per order (entry and exit)
 ALLOCATION = 0.75
 BENCHMARK_SYMBOL = "NIFTY"

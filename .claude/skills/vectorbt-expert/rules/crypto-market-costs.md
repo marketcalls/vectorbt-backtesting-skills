@@ -1,13 +1,13 @@
 ---
 name: crypto-market-costs
-description: Realistic crypto market transaction cost modeling based on Binance - spot, USDT-M futures, COIN-M futures, maker/taker fees, funding rates
+description: Realistic crypto market transaction cost modeling - spot, USDT-M futures, COIN-M futures, maker/taker fees, funding rates
 metadata:
-  tags: fees, costs, binance, crypto, spot, futures, maker, taker, funding-rate, bitcoin, ethereum
+  tags: fees, costs, crypto, spot, futures, maker, taker, funding-rate, bitcoin, ethereum
 ---
 
-# Crypto Market Transaction Costs (Binance Standard)
+# Crypto Market Transaction Costs
 
-All fee calculations are based on Binance VIP 0 (Regular) tier. Binance is the reference exchange for crypto backtesting due to highest liquidity and standard fee structure.
+All fee calculations are based on standard crypto exchange fee tiers (base/regular tier). These defaults represent the most common fee structure across major exchanges.
 
 ## Fee Summary by Segment
 
@@ -27,9 +27,9 @@ VectorBT's `fees` parameter is a percentage applied to both buy and sell turnove
 Maker and taker both 0.1% at VIP 0. Most backtest fills simulate market orders (taker).
 
 ```python
-# Crypto Spot (Binance Base): 0.1% taker fee per side
+# Crypto Spot (Base Tier): 0.1% taker fee per side
 fees = 0.001             # 0.1% per side (taker)
-fixed_fees = 0           # No fixed fee on Binance
+fixed_fees = 0           # No fixed fee on most crypto exchanges
 
 pf = vbt.Portfolio.from_signals(
     close, entries, exits,
@@ -47,7 +47,7 @@ pf = vbt.Portfolio.from_signals(
 25% discount when paying fees with BNB. Reduces 0.1% to 0.075%.
 
 ```python
-# Crypto Spot (Binance + BNB discount): 0.075% taker fee per side
+# Crypto Spot (Token Discount): 0.075% taker fee per side
 fees = 0.00075           # 0.075% per side (taker with BNB)
 fixed_fees = 0
 
@@ -67,7 +67,7 @@ pf = vbt.Portfolio.from_signals(
 Maker 0.02%, Taker 0.05% at VIP 0. Use taker fee for conservative backtests.
 
 ```python
-# USDT-M Futures (Binance Taker): 0.05% per side
+# USDT-M Futures (Taker): 0.05% per side
 fees = 0.0005            # 0.05% per side (taker)
 fixed_fees = 0
 
@@ -87,7 +87,7 @@ pf = vbt.Portfolio.from_signals(
 For strategies using limit orders, the lower maker fee applies.
 
 ```python
-# USDT-M Futures (Binance Maker): 0.02% per side
+# USDT-M Futures (Maker): 0.02% per side
 fees = 0.0002            # 0.02% per side (maker)
 fixed_fees = 0
 
@@ -107,7 +107,7 @@ pf = vbt.Portfolio.from_signals(
 Maker 0.01%, Taker 0.05% at VIP 0. Settled in the base cryptocurrency.
 
 ```python
-# COIN-M Futures (Binance Taker): 0.05% per side
+# COIN-M Futures (Taker): 0.05% per side
 fees = 0.0005            # 0.05% per side (taker)
 fixed_fees = 0
 
@@ -127,7 +127,7 @@ pf = vbt.Portfolio.from_signals(
 Use these constants at the top of every crypto backtest script:
 
 ```python
-# --- Fee Constants (Binance Standard - VIP 0) ---
+# --- Fee Constants (Crypto Exchange Standard - Base Tier) ---
 # Spot Trading
 FEES_CRYPTO_SPOT = 0.001             # 0.1% per side (taker)
 FEES_CRYPTO_SPOT_BNB = 0.00075      # 0.075% per side (taker with BNB discount)
@@ -141,11 +141,11 @@ FEES_CRYPTO_FUTURES_MAKER = 0.0002  # 0.02% per side (maker)
 FEES_CRYPTO_COINM_TAKER = 0.0005   # 0.05% per side (taker)
 FEES_CRYPTO_COINM_MAKER = 0.0001   # 0.01% per side (maker)
 
-# No fixed fees on Binance
+# No fixed fees on most crypto exchanges
 FIXED_FEES_CRYPTO = 0
 ```
 
-## Binance VIP Tier Fee Schedule
+## Exchange VIP Tier Fee Schedule (Typical)
 
 ### Spot Trading
 
@@ -238,7 +238,7 @@ For higher resolution data or futures data, consider using CCXT:
 import ccxt
 import pandas as pd
 
-exchange = ccxt.binance()
+exchange = ccxt.binance()  # or any supported exchange
 ohlcv = exchange.fetch_ohlcv("BTC/USDT", timeframe="1h", limit=1000)
 df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
 df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
@@ -251,7 +251,7 @@ df = df.set_index("timestamp")
 # Crypto allows fractional units - do NOT set min_size=1
 pf = vbt.Portfolio.from_signals(
     close, entries, exits,
-    fees=0.001,              # Binance spot taker
+    fees=0.001,              # Crypto spot taker
     fixed_fees=0,
     init_cash=10_000,        # USDT
     size=0.5,                # 50% per trade
@@ -267,23 +267,23 @@ pf = vbt.Portfolio.from_signals(
 
 | Market | Segment | Per-Side Fee | Fixed Fee | Round-Trip Cost on $10K |
 |--------|---------|-------------|-----------|------------------------|
-| India (Zerodha) | Delivery Equity | 0.111% | Rs 20 | ~Rs 2,265 (~$27) |
-| India (Zerodha) | Intraday Equity | 0.0225% | Rs 20 | ~Rs 485 (~$6) |
-| India (Zerodha) | F&O Futures | 0.018% | Rs 20 | ~Rs 400 (~$5) |
-| US (IBKR Pro) | Stocks | 0.01% | $1.00 | ~$4.10 |
-| US (IBKR Lite) | Stocks | ~0.001% | $0 | ~$0.20 |
-| US (IBKR) | E-mini Futures | ~0.001% | $2.25 | ~$4.52 |
-| Crypto (Binance) | Spot | 0.1% | $0 | ~$20.00 |
-| Crypto (Binance) | Spot + BNB | 0.075% | $0 | ~$15.00 |
-| Crypto (Binance) | USDT-M Futures | 0.05% | $0 | ~$10.00 |
+| India | Delivery Equity | 0.111% | Rs 20 | ~Rs 2,265 (~$27) |
+| India | Intraday Equity | 0.0225% | Rs 20 | ~Rs 485 (~$6) |
+| India | F&O Futures | 0.018% | Rs 20 | ~Rs 400 (~$5) |
+| US (Per-Share) | Stocks | 0.01% | $1.00 | ~$4.10 |
+| US (Comm-Free) | Stocks | ~0.001% | $0 | ~$0.20 |
+| US | E-mini Futures | ~0.001% | $2.25 | ~$4.52 |
+| Crypto | Spot | 0.1% | $0 | ~$20.00 |
+| Crypto | Spot (Discounted) | 0.075% | $0 | ~$15.00 |
+| Crypto | USDT-M Futures | 0.05% | $0 | ~$10.00 |
 
 ## Best Practices
 
 - **Spot trading**: Always use taker fees (0.1%) for conservative backtesting. Most signals result in market orders.
 - **Futures**: Model both taker fees AND funding rate for positions held > 1 day
-- **BNB discount**: Only apply the 25% BNB discount if you realistically hold BNB. Use base fees for conservative modeling.
+- **Token discount**: Only apply exchange token discounts if you realistically hold them. Use base fees for conservative modeling.
 - **Slippage**: Crypto markets can have significant slippage on larger orders. Add `slippage=0.001` (0.1%) for realistic modeling on altcoins or low-liquidity pairs.
 - **Fractional units**: Unlike stocks, crypto allows fractional trading. Do NOT set `min_size=1` or `size_granularity=1` for crypto.
 - **24/7 markets**: Crypto trades 24/7 - no weekend gaps. Use `freq="1D"` for daily, but note that weekends are trading days.
-- **When in doubt**, use Binance spot taker (0.1%) as a safe default for any crypto backtest
+- **When in doubt**, use spot taker (0.1%) as a safe default for any crypto backtest
 - Default crypto benchmark: Bitcoin (`BTC-USD`) from yfinance

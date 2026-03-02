@@ -2,7 +2,7 @@
 MACD Signal-Candle Breakout Backtest - VectorBT + OpenAlgo
 Strategy: MACD zero-line defines bull/bear regimes. Entry on breakout of signal candle.
 Indicators: TA-Lib MACD, openalgo.ta helpers.
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 

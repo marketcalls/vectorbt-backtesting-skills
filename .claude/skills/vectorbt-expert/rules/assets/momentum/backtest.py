@@ -2,7 +2,7 @@
 Double Momentum Backtest - VectorBT + OpenAlgo
 Strategy: MOM + MOM-of-MOM for directional confirmation with next-bar fill.
 Indicators: TA-Lib MOM.
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 

@@ -3,9 +3,9 @@ Realistic Transaction Cost Analysis Template - VectorBT + OpenAlgo
 Compares strategy performance across different cost models:
   1. Zero fees (unrealistic upper bound)
   2. Simplified flat fee
-  3. Zerodha delivery equity (realistic)
-  4. Zerodha intraday equity
-  5. Zerodha F&O futures
+  3. Indian delivery equity (realistic)
+  4. Indian intraday equity
+  5. Indian F&O futures
 Shows the real impact of transaction costs on strategy profitability.
 Indicators: TA-Lib exclusively.
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
@@ -37,7 +37,7 @@ ALLOCATION = 0.75
 BENCHMARK_SYMBOL = "NIFTY"
 BENCHMARK_EXCHANGE = "NSE_INDEX"
 
-# --- Zerodha Fee Models ---
+# --- Indian Market Fee Models ---
 FEE_MODELS = {
     "Zero Fees (Unrealistic)": {
         "fees": 0, "fixed_fees": 0, "slippage": 0,
@@ -45,17 +45,17 @@ FEE_MODELS = {
     "Simplified 0.1%": {
         "fees": 0.001, "fixed_fees": 0, "slippage": 0,
     },
-    "Zerodha Delivery": {
+    "Delivery Equity": {
         "fees": 0.00111,       # 0.111% (STT 0.1% both + statutory)
         "fixed_fees": 20,      # Rs 20 per order
         "slippage": 0.0005,    # 0.05% slippage
     },
-    "Zerodha Intraday Equity": {
+    "Intraday Equity": {
         "fees": 0.000225,      # 0.0225% (STT 0.025% sell + statutory)
         "fixed_fees": 20,      # Rs 20 per order
         "slippage": 0.0005,
     },
-    "Zerodha F&O Futures": {
+    "F&O Futures": {
         "fees": 0.00018,       # 0.018% (STT 0.02% sell + statutory)
         "fixed_fees": 20,
         "slippage": 0.0002,    # Lower slippage for liquid futures
@@ -164,12 +164,12 @@ print(results_df.to_string())
 
 # --- Explain for Traders ---
 zero_return = portfolios["Zero Fees (Unrealistic)"].total_return()
-delivery_return = portfolios["Zerodha Delivery"].total_return()
+delivery_return = portfolios["Delivery Equity"].total_return()
 cost_drag = zero_return - delivery_return
 
 print("\n--- What This Means for You ---")
 print(f"* With zero fees, this strategy returns {zero_return * 100:.2f}%")
-print(f"* With realistic Zerodha delivery fees, it returns {delivery_return * 100:.2f}%")
+print(f"* With realistic delivery fees, it returns {delivery_return * 100:.2f}%")
 print(f"* Transaction costs eat {cost_drag * 100:.2f}% of your returns")
 print(f"  -> That is Rs {cost_drag * INIT_CASH:,.0f} lost to fees on Rs {INIT_CASH:,} capital")
 

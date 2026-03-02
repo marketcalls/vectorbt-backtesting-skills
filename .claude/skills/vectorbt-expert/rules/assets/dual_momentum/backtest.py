@@ -2,7 +2,7 @@
 Dual Momentum (ETF Rotation) Backtest - VectorBT + OpenAlgo
 Strategy: Quarterly momentum rotation between NIFTYBEES and GOLDBEES.
           Buys previous quarter's outperformer for the next quarter.
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 
@@ -26,7 +26,7 @@ SYMBOLS = ["NIFTYBEES", "GOLDBEES"]
 EXCHANGE = "NSE"
 INTERVAL = "D"
 INIT_CASH = 10_00_000
-FEES = 0.00111              # Zerodha delivery equity
+FEES = 0.00111              # Indian delivery equity
 FIXED_FEES = 20             # Rs 20 per order
 ALLOCATION = 0.75
 BENCHMARK_SYMBOL = "NIFTY"

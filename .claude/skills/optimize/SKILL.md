@@ -32,7 +32,7 @@ If no arguments, ask the user which strategy to optimize.
    - Use loop-based optimization to collect multiple metrics per combo
    - Track: total_return, sharpe_ratio, max_drawdown, trade_count for each combination
    - Use `tqdm` for progress bars
-   - **Zerodha fees**: `fees=0.00111, fixed_fees=20` for delivery equity
+   - **Indian delivery fees**: `fees=0.00111, fixed_fees=20` for delivery equity
    - Find best parameters by total return AND by Sharpe ratio
    - Print top 10 results for both criteria
    - Generate Plotly heatmap of total return across parameter grid (`template="plotly_dark"`)

@@ -31,7 +31,7 @@ If no arguments, ask the user which strategy they want.
    - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA)
    - Use `ta.exrem()` to clean duplicate signals (always `.fillna(False)` before exrem)
    - Run `vbt.Portfolio.from_signals()` with `min_size=1, size_granularity=1`
-   - **Zerodha fees**: `fees=0.00111, fixed_fees=20` for delivery equity
+   - **Indian delivery fees**: `fees=0.00111, fixed_fees=20` for delivery equity
    - Fetch NIFTY benchmark via OpenAlgo (`symbol="NIFTY", exchange="NSE_INDEX"`)
    - Print full `pf.stats()`
    - **Print Strategy vs Benchmark comparison table** (Total Return, Sharpe, Sortino, Max DD, Win Rate, Trades, Profit Factor)

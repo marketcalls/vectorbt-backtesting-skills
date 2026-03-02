@@ -65,7 +65,7 @@ The `npx skills add` command detects which agents you have installed and places 
 | **Crypto** | yfinance / CCXT | Spot, Perpetual Futures (maker/taker) | Bitcoin |
 | **Custom** | Any provider via extensible pattern | User-defined | User-defined |
 
-> **Broker-neutral**: Fee models are based on standard industry references (Zerodha for India, IBKR for US, Binance for Crypto) and can be adjusted for any broker by changing the `fees` and `fixed_fees` constants.
+> **Broker-neutral**: Fee models use realistic industry-standard defaults and can be adjusted for any broker by changing the `fees` and `fixed_fees` constants.
 
 ## Capabilities
 
@@ -239,7 +239,7 @@ Compare multiple strategies side-by-side with benchmark.
 
 Realistic fee models for each market, auto-selected based on the asset. All fee constants are configurable — adjust for your broker by changing the `fees` and `fixed_fees` values.
 
-#### Indian Market Fees (Reference: Zerodha)
+#### Indian Market Fees
 
 | Segment | `fees` | `fixed_fees` |
 |---------|--------|-------------|
@@ -248,7 +248,7 @@ Realistic fee models for each market, auto-selected based on the asset. All fee 
 | F&O Futures | 0.00018 (0.018%) | Rs 20/order |
 | F&O Options | 0.00098 (0.098%) | Rs 20/order |
 
-#### US Market Fees (Reference: IBKR)
+#### US Market Fees
 
 | Segment | `fees` | `fixed_fees` |
 |---------|--------|-------------|
@@ -258,7 +258,7 @@ Realistic fee models for each market, auto-selected based on the asset. All fee 
 | E-mini Futures (ES, NQ) | 0.000009 (~0.001%) | $2.25/contract |
 | Micro Futures (MES, MNQ) | 0.00002 (~0.002%) | $0.55/contract |
 
-#### Crypto Market Fees (Reference: Binance)
+#### Crypto Market Fees
 
 | Segment | `fees` | `fixed_fees` |
 |---------|--------|-------------|
@@ -442,9 +442,9 @@ backtesting/
 | `parameter-optimization.md` | Broadcasting and loop-based optimization, heatmaps |
 | `performance-analysis.md` | Stats, metrics, benchmark comparison, CAGR calculation |
 | `plotting.md` | Candlestick (category x-axis), VectorBT plots, custom Plotly |
-| `indian-market-costs.md` | Indian market fee model — delivery, intraday, F&O (reference: Zerodha) |
-| `us-market-costs.md` | US market fee model — stocks, options, futures (reference: IBKR) |
-| `crypto-market-costs.md` | Crypto fee model — spot, perpetual futures, funding rates (reference: Binance) |
+| `indian-market-costs.md` | Indian market fee model — delivery, intraday, F&O (4-segment) |
+| `us-market-costs.md` | US market fee model — stocks, options, futures (per-share + per-contract) |
+| `crypto-market-costs.md` | Crypto fee model — spot, perpetual futures, funding rates (maker/taker) |
 | `futures-backtesting.md` | SEBI revised lot sizes (Dec 2025), US contract specs, value sizing |
 | `long-short-trading.md` | Simultaneous long/short, direction comparison |
 | `csv-data-resampling.md` | Loading CSV data, resampling with Indian market alignment |
@@ -478,9 +478,9 @@ The `.env` file supports:
 OPENALGO_API_KEY=your_openalgo_api_key_here
 OPENALGO_HOST=http://127.0.0.1:5000
 
-# Crypto Markets (CCXT) - Optional
-BINANCE_API_KEY=
-BINANCE_SECRET_KEY=
+# Crypto Markets (CCXT) — Optional
+CRYPTO_API_KEY=
+CRYPTO_SECRET_KEY=
 
 # Custom Data Providers - add your own keys
 # ALPACA_API_KEY=

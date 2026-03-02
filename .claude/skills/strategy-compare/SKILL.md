@@ -28,7 +28,7 @@ If "long-vs-short" is one of the strategies, compare longonly vs shortonly vs bo
    - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, etc.)
    - Clean signals with `ta.exrem()` (always `.fillna(False)` before exrem)
    - Run each strategy on the same data
-   - **Zerodha fees**: `fees=0.00111, fixed_fees=20` for delivery equity
+   - **Indian delivery fees**: `fees=0.00111, fixed_fees=20` for delivery equity
    - Collect key metrics from each into a side-by-side DataFrame
    - **Include NIFTY benchmark** in the comparison table (via OpenAlgo `NSE_INDEX`)
    - **Print Strategy vs Benchmark comparison table**: Total Return, Sharpe, Sortino, Max DD, Win Rate, Trades, Profit Factor

@@ -1,17 +1,17 @@
 ---
 name: indian-market-costs
-description: Realistic Indian market transaction cost modeling based on Zerodha brokerage calculator - STT, stamp duty, GST, SEBI fees, exchange charges
+description: Realistic Indian market transaction cost modeling - STT, stamp duty, GST, SEBI fees, exchange charges
 metadata:
-  tags: fees, costs, stt, stamp-duty, gst, sebi, brokerage, zerodha, transaction-costs, indian-market
+  tags: fees, costs, stt, stamp-duty, gst, sebi, brokerage, transaction-costs, indian-market
 ---
 
-# Indian Market Transaction Costs (Zerodha Standard)
+# Indian Market Transaction Costs
 
-All fee calculations are based on the Zerodha brokerage calculator values. These are the standard costs used across all backtesting scripts.
+All fee calculations are based on standard Indian brokerage and regulatory charges. These are the standard costs used across all backtesting scripts.
 
 ## Fee Summary by Segment
 
-Based on Zerodha calculator (Buy=1000, Sell=1000, Qty=500, Turnover=10L per side):
+Based on standard charges (Buy=1000, Sell=1000, Qty=500, Turnover=10L per side):
 
 | Component | Intraday Equity | Delivery Equity | F&O Futures | F&O Options |
 |-----------|----------------|-----------------|-------------|-------------|
@@ -28,7 +28,7 @@ VectorBT's `fees` parameter is a percentage applied to both buy and sell turnove
 
 ### Intraday Equity
 
-Total charges on 10L turnover = Rs 224.61 (from Zerodha calculator)
+Total charges on 10L turnover = Rs 224.61
 Plus brokerage: Rs 20 buy + Rs 20 sell = Rs 40
 
 ```python
@@ -47,9 +47,9 @@ pf = vbt.Portfolio.from_signals(
 
 ### Delivery Equity (CNC)
 
-Total charges on 10L turnover = Rs 1112.41 (from Zerodha calculator)
-Brokerage: Rs 0 (free delivery on Zerodha)
-But we add Rs 20/order for conservative modeling (other brokers charge).
+Total charges on 10L turnover = Rs 1112.41
+Brokerage: Rs 0 (many brokers offer free delivery).
+We add Rs 20/order for conservative modeling.
 
 ```python
 # Delivery Equity: ~0.111% fees + Rs 20 fixed per order
@@ -67,7 +67,7 @@ pf = vbt.Portfolio.from_signals(
 
 ### F&O Futures
 
-Total charges on 10L turnover = Rs 179.97 (from Zerodha calculator)
+Total charges on 10L turnover = Rs 179.97
 Plus brokerage: Rs 20 buy + Rs 20 sell = Rs 40
 
 ```python
@@ -86,7 +86,7 @@ pf = vbt.Portfolio.from_signals(
 
 ### F&O Options
 
-Total charges on 10L turnover = Rs 982.63 (from Zerodha calculator)
+Total charges on 10L turnover = Rs 982.63
 Plus brokerage: Rs 20 buy + Rs 20 sell = Rs 40
 
 ```python
@@ -108,7 +108,7 @@ pf = vbt.Portfolio.from_signals(
 Use these constants at the top of every backtest script:
 
 ```python
-# --- Fee Constants (Zerodha Standard) ---
+# --- Fee Constants (Indian Market Standard) ---
 # Intraday Equity
 FEES_INTRADAY_EQ = 0.000225       # 0.0225% per side
 FIXED_FEES_INTRADAY_EQ = 20       # Rs 20 per order
@@ -132,7 +132,7 @@ For users who need exact per-trade cost calculation:
 
 ```python
 def calculate_charges_intraday_eq(buy_value, sell_value):
-    """Calculate exact Zerodha charges for intraday equity."""
+    """Calculate exact charges for intraday equity."""
     turnover = buy_value + sell_value
     brokerage = min(20, 0.0003 * buy_value) + min(20, 0.0003 * sell_value)  # 0.03% or Rs 20, whichever is lower
     stt = 0.00025 * sell_value                    # 0.025% on sell side
@@ -144,9 +144,9 @@ def calculate_charges_intraday_eq(buy_value, sell_value):
     return total
 
 def calculate_charges_delivery_eq(buy_value, sell_value):
-    """Calculate exact Zerodha charges for delivery equity."""
+    """Calculate exact charges for delivery equity."""
     turnover = buy_value + sell_value
-    brokerage = 0                                  # Free delivery on Zerodha
+    brokerage = 0                                  # Free delivery (common with discount brokers)
     stt = 0.001 * turnover                         # 0.1% on both sides
     exchange_txn = 0.0000307 * turnover            # 0.00307% on total
     gst = 0.18 * (brokerage + exchange_txn)        # 18% on brokerage + exchange txn
@@ -156,7 +156,7 @@ def calculate_charges_delivery_eq(buy_value, sell_value):
     return total
 
 def calculate_charges_futures(buy_value, sell_value):
-    """Calculate exact Zerodha charges for F&O Futures."""
+    """Calculate exact charges for F&O Futures."""
     turnover = buy_value + sell_value
     brokerage = 20 + 20                            # Rs 20 per order
     stt = 0.0002 * sell_value                      # 0.02% on sell side (futures)
@@ -168,7 +168,7 @@ def calculate_charges_futures(buy_value, sell_value):
     return total
 
 def calculate_charges_options(buy_value, sell_value):
-    """Calculate exact Zerodha charges for F&O Options."""
+    """Calculate exact charges for F&O Options."""
     turnover = buy_value + sell_value
     brokerage = 20 + 20                            # Rs 20 per order
     stt = 0.001 * sell_value                       # 0.1% on sell side (options)

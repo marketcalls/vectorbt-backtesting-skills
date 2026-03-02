@@ -14,7 +14,7 @@ user-invocable: false
 - Technical indicators: **TA-Lib** (ALWAYS - never use VectorBT built-in indicators)
 - Specialty indicators: `openalgo.ta` for Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA
 - Signal cleaning: `openalgo.ta` for exrem, crossover, crossunder, flip
-- Fee model: Zerodha brokerage calculator values with Rs 20/order
+- Fee model: Indian market standard (STT + statutory charges + Rs 20/order)
 - Benchmark: NIFTY 50 via OpenAlgo (`NSE_INDEX`) by default
 - Charts: Plotly with `template="plotly_dark"`
 - Environment variables loaded from single `.env` at project root via `find_dotenv()` (walks up from script dir)
@@ -27,7 +27,7 @@ user-invocable: false
 2. **Use OpenAlgo ta** for indicators NOT in TA-Lib: Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA.
 3. **Use OpenAlgo ta** for signal utilities: `ta.exrem()`, `ta.crossover()`, `ta.crossunder()`, `ta.flip()`.
 4. **Always clean signals** with `ta.exrem()` after generating raw buy/sell signals. Always `.fillna(False)` before exrem.
-5. **Market-specific fees**: India=Zerodha ([indian-market-costs](rules/indian-market-costs.md)), US=IBKR ([us-market-costs](rules/us-market-costs.md)), Crypto=Binance ([crypto-market-costs](rules/crypto-market-costs.md)). Auto-select based on user's market.
+5. **Market-specific fees**: India ([indian-market-costs](rules/indian-market-costs.md)), US ([us-market-costs](rules/us-market-costs.md)), Crypto ([crypto-market-costs](rules/crypto-market-costs.md)). Auto-select based on user's market.
 6. **Default benchmarks**: India=NIFTY via OpenAlgo, US=S&P 500 (`^GSPC`), Crypto=Bitcoin (`BTC-USD`). See [data-fetching](rules/data-fetching.md) Market Selection Guide.
 7. **Always produce** a Strategy vs Benchmark comparison table after every backtest.
 8. **Always explain** the backtest report in plain language so even normal traders understand risk and strength.
@@ -49,9 +49,9 @@ Detailed reference for each topic is in `rules/`:
 | [parameter-optimization](rules/parameter-optimization.md) | Broadcasting and loop-based optimization |
 | [performance-analysis](rules/performance-analysis.md) | Stats, metrics, benchmark comparison, CAGR |
 | [plotting](rules/plotting.md) | Candlestick (category x-axis), VectorBT plots, custom Plotly |
-| [indian-market-costs](rules/indian-market-costs.md) | Zerodha fee model by segment |
-| [us-market-costs](rules/us-market-costs.md) | IBKR fee model (stocks, options, futures) |
-| [crypto-market-costs](rules/crypto-market-costs.md) | Binance fee model (spot, USDT-M, COIN-M futures) |
+| [indian-market-costs](rules/indian-market-costs.md) | Indian market fee model by segment |
+| [us-market-costs](rules/us-market-costs.md) | US market fee model (stocks, options, futures) |
+| [crypto-market-costs](rules/crypto-market-costs.md) | Crypto fee model (spot, USDT-M, COIN-M futures) |
 | [futures-backtesting](rules/futures-backtesting.md) | Lot sizes (SEBI revised Dec 2025), value sizing |
 | [long-short-trading](rules/long-short-trading.md) | Simultaneous long/short, direction comparison |
 | [csv-data-resampling](rules/csv-data-resampling.md) | Loading CSV, resampling with Indian market alignment |
@@ -63,7 +63,7 @@ Detailed reference for each topic is in `rules/`:
 
 ## Strategy Templates (in rules/assets/)
 
-Production-ready scripts with Zerodha fees, NIFTY benchmark, comparison table, and plain-language report:
+Production-ready scripts with realistic fees, NIFTY benchmark, comparison table, and plain-language report:
 
 | Template | Path | Description |
 |----------|------|-------------|
@@ -102,7 +102,7 @@ SYMBOL = "SBIN"
 EXCHANGE = "NSE"
 INTERVAL = "D"
 INIT_CASH = 1_000_000
-FEES = 0.00111              # Zerodha delivery equity
+FEES = 0.00111              # Indian delivery equity (STT + statutory)
 FIXED_FEES = 20             # Rs 20 per order
 ALLOCATION = 0.75
 BENCHMARK_SYMBOL = "NIFTY"

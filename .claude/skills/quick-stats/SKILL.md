@@ -20,7 +20,7 @@ Generate a single code block the user can paste into a Jupyter cell or run as a 
 1. Fetch data from OpenAlgo (or yfinance as fallback)
 2. **Use TA-Lib** for EMA 10/20 crossover (never VectorBT built-in)
 3. Clean signals with `ta.exrem()` (always `.fillna(False)` before exrem)
-4. Use **Zerodha delivery fees**: `fees=0.00111, fixed_fees=20`
+4. Use **Indian delivery fees**: `fees=0.00111, fixed_fees=20`
 5. Fetch **NIFTY benchmark** via OpenAlgo (`symbol="NIFTY", exchange="NSE_INDEX"`)
 6. Print a compact results summary:
 
@@ -28,7 +28,7 @@ Generate a single code block the user can paste into a Jupyter cell or run as a 
 Symbol: SBIN | Exchange: NSE | Interval: D
 Strategy: EMA 10/20 Crossover
 Period: 2023-01-01 to 2026-02-27
-Fees: Zerodha Delivery (0.111% + Rs 20/order)
+Fees: Delivery Equity (0.111% + Rs 20/order)
 -------------------------------------------
 Total Return:    45.23%
 Sharpe Ratio:    1.45

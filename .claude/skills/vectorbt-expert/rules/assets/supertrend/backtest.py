@@ -3,7 +3,7 @@ Supertrend Backtest - VectorBT + OpenAlgo
 Strategy: Buy on uptrend crossover, sell on downtrend crossover.
            Intraday: entries 9:30-15:00, forced exit at 15:15.
 Indicators: openalgo.ta.supertrend.
-Fees: Zerodha intraday equity model (0.0225% + Rs 20/order).
+Fees: Indian intraday equity model (0.0225% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 
@@ -27,7 +27,7 @@ INTERVAL = "5m"
 ST_PERIOD = 10
 ST_MULTIPLIER = 3.0
 INIT_CASH = 1_000_000
-FEES = 0.000225             # Zerodha intraday equity
+FEES = 0.000225             # Indian intraday equity
 FIXED_FEES = 20             # Rs 20 per order
 ALLOCATION = 0.75
 BENCHMARK_SYMBOL = "NIFTY"

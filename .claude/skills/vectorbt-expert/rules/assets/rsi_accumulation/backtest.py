@@ -5,7 +5,7 @@ Strategy: Weekly RSI-based slab-wise accumulation of NIFTYBEES.
           Slab allocation: RSI 50-68 = 5%, RSI 30-50 = 10%, RSI <30 = 20%.
           Exit all when weekly RSI > 70.
 Indicators: TA-Lib RSI.
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 
@@ -32,7 +32,7 @@ EXCHANGE = "NSE"
 INDEX_EXCHANGE = "NSE_INDEX"
 INTERVAL = "15m"
 INIT_CASH = 10_00_000
-FEES = 0.00111              # Zerodha delivery equity
+FEES = 0.00111              # Indian delivery equity
 FIXED_FEES = 20             # Rs 20 per order
 RSI_WINDOW = 14             # Weekly RSI period
 RSI_BUY_THRESHOLD = 68      # Buy if weekly RSI < 68

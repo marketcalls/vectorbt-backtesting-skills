@@ -2,7 +2,7 @@
 SDA2 Trend Following Backtest - VectorBT + OpenAlgo
 Strategy: WMA-based channel with STDDEV and ATR bands.
 Indicators: TA-Lib WMA, STDDEV, ATR.
-Fees: Zerodha delivery equity model (0.111% + Rs 20/order).
+Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 

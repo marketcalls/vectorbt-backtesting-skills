@@ -70,7 +70,7 @@ entries = close > upper_band.shift(1)
 # BAD: No fees
 pf = vbt.Portfolio.from_signals(close, entries, exits, init_cash=1_000_000)
 
-# GOOD: Realistic Zerodha delivery equity fees
+# GOOD: Realistic Indian delivery equity fees
 pf = vbt.Portfolio.from_signals(
     close, entries, exits,
     fees=0.00111,           # 0.111% per side (STT + statutory)
@@ -81,7 +81,7 @@ pf = vbt.Portfolio.from_signals(
 )
 ```
 
-See [indian-market-costs](./indian-market-costs.md) for the complete Zerodha-based fee model.
+See [indian-market-costs](./indian-market-costs.md) for the complete Indian market fee model.
 
 ## 6. Ignoring Slippage and Market Impact
 
@@ -148,7 +148,7 @@ See [indian-market-costs](./indian-market-costs.md) for the complete Zerodha-bas
 
 - [ ] Walk-forward analysis shows positive OOS returns
 - [ ] Strategy tested on 3+ different symbols
-- [ ] Realistic transaction costs included (Zerodha fee model)
+- [ ] Realistic transaction costs included (market-specific fee model)
 - [ ] Slippage included (0.05% minimum)
 - [ ] At least 50+ trades in backtest
 - [ ] No lookahead bias (all indicators shifted properly)

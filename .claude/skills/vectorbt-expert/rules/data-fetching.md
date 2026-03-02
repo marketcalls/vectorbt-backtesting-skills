@@ -253,7 +253,7 @@ df = yf.download("ETH-USD", start="2022-01-01", end="2025-01-01",
 
 ### CCXT (Higher Resolution — Optional API Key)
 
-For intraday crypto data or Binance-specific pairs. Public OHLCV data does NOT require API keys. Only private endpoints (account, orders) need keys.
+For intraday crypto data or exchange-specific pairs. Public OHLCV data does NOT require API keys. Only private endpoints (account, orders) need keys.
 
 ```python
 # pip install ccxt
@@ -274,16 +274,16 @@ close = df["close"]
 For authenticated CCXT (account data):
 
 ```python
-# Authenticated - requires BINANCE_API_KEY and BINANCE_SECRET_KEY in .env
+# Authenticated — requires CRYPTO_API_KEY and CRYPTO_SECRET_KEY in .env
 exchange = ccxt.binance({
-    "apiKey": os.getenv("BINANCE_API_KEY"),
-    "secret": os.getenv("BINANCE_SECRET_KEY"),
+    "apiKey": os.getenv("CRYPTO_API_KEY"),
+    "secret": os.getenv("CRYPTO_SECRET_KEY"),
 })
 ```
 
 ### Crypto Tickers
 
-| Pair | yfinance | CCXT (Binance) |
+| Pair | yfinance | CCXT |
 |------|----------|----------------|
 | BTC/USD | `BTC-USD` | `BTC/USDT` |
 | ETH/USD | `ETH-USD` | `ETH/USDT` |
@@ -366,7 +366,7 @@ close_prices = pd.DataFrame({sym: dfs[sym]["close"] for sym in symbols})
 |---------------------|--------|-------------|-----------|
 | NSE, BSE, NIFTY, BANKNIFTY, Indian stock names | India | OpenAlgo | [indian-market-costs](./indian-market-costs.md) |
 | AAPL, SPY, S&P 500, NASDAQ, US stock names | US | yfinance | [us-market-costs](./us-market-costs.md) |
-| BTC, ETH, crypto, Binance, USDT | Crypto | yfinance or CCXT | [crypto-market-costs](./crypto-market-costs.md) |
+| BTC, ETH, crypto, USDT | Crypto | yfinance or CCXT | [crypto-market-costs](./crypto-market-costs.md) |
 
 ---
 
