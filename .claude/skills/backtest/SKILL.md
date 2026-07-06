@@ -29,8 +29,8 @@ If no arguments, ask the user which strategy they want.
    - Fetch data via `client.history()` from OpenAlgo
    - If user provides a DuckDB path, load data directly via `duckdb.connect(path, read_only=True)` instead of OpenAlgo API. Auto-detect format: Historify (`market_data` table, epoch timestamps) vs custom (`ohlcv` table, date+time). See vectorbt-expert `rules/duckdb-data.md`.
    - If `openalgo.ta` is not importable (standalone DuckDB), use inline `exrem()` fallback.
-   - **Use TA-Lib for ALL indicators** (EMA, SMA, RSI, MACD, BBands, ATR, ADX, STDDEV, MOM)
-   - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA)
+   - **Use OpenAlgo ta for ALL indicators by default** (EMA, SMA, RSI, MACD, BBands, ATR, ADX, STDDEV, MOM, and 90+ more) - `from openalgo import ta`
+   - **Only use TA-Lib if the user explicitly says "talib"/"TA-Lib"** in their request; specialty indicators (Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA) always come from OpenAlgo ta regardless, since TA-Lib has no equivalent
    - Use `ta.exrem()` to clean duplicate signals (always `.fillna(False)` before exrem)
    - Run `vbt.Portfolio.from_signals()` with `min_size=1, size_granularity=1`
    - **Indian delivery fees**: `fees=0.00111, fixed_fees=20` for delivery equity
@@ -38,7 +38,7 @@ If no arguments, ask the user which strategy they want.
    - Print full `pf.stats()`
    - **Print Strategy vs Benchmark comparison table** (Total Return, Sharpe, Sortino, Max DD, Win Rate, Trades, Profit Factor)
    - **Explain the backtest report** in plain language for normal traders
-   - Generate QuantStats HTML tearsheet if `quantstats` is available
+   - Generate OpenStatz HTML tearsheet if `openstatz` is available (always use OpenStatz, never QuantStats)
    - Plot equity curve + drawdown using Plotly (`template="plotly_dark"`)
    - Export trades to CSV
 5. Never use icons/emojis in code or logger output

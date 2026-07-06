@@ -11,7 +11,7 @@ metadata:
 
 Test thousands of parameter combinations simultaneously without loops.
 
-**Exception:** Broadcasting requires VectorBT's built-in `vbt.MA.run()` because TA-Lib cannot vectorize across parameter arrays. This is the ONLY case where `vbt.MA.run()` is acceptable — for parameter sweeps only, never for production backtests.
+**Exception:** Broadcasting requires VectorBT's built-in `vbt.MA.run()` because neither OpenAlgo ta nor TA-Lib can vectorize across parameter arrays. This is the ONLY case where `vbt.MA.run()` is acceptable — for parameter sweeps only, never for production backtests.
 
 ```python
 import numpy as np
@@ -41,12 +41,11 @@ print(f"Best return: {total_returns.max():.2%}")
 
 ## Method 2: Loop-Based Optimization (Recommended)
 
-Uses TA-Lib for indicators (compliant with project rules). More control, collects custom metrics:
+Uses OpenAlgo ta for indicators (default, compliant with project rules — swap to TA-Lib only if the user explicitly asks for it). More control, collects custom metrics:
 
 ```python
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 from tqdm import tqdm
 from openalgo import ta
@@ -62,8 +61,8 @@ for short_span in tqdm(short_spans, desc="Optimizing"):
         if short_span >= long_span:
             continue
 
-        ema_f = pd.Series(tl.EMA(close.values, timeperiod=int(short_span)), index=close.index)
-        ema_s = pd.Series(tl.EMA(close.values, timeperiod=int(long_span)), index=close.index)
+        ema_f = ta.ema(close, int(short_span))
+        ema_s = ta.ema(close, int(long_span))
 
         buy_raw = (ema_f > ema_s) & (ema_f.shift(1) <= ema_s.shift(1))
         sell_raw = (ema_f < ema_s) & (ema_f.shift(1) >= ema_s.shift(1))
@@ -133,8 +132,8 @@ fig.show()
 
 | Method | Pros | Cons |
 |--------|------|------|
-| Broadcasting | Extremely fast, tests thousands at once | Limited to VectorBT's built-in indicators (exception to TA-Lib rule) |
-| Loop-based | Full TA-Lib compliance, any indicator, custom metrics | Slower, needs tqdm for progress |
+| Broadcasting | Extremely fast, tests thousands at once | Limited to VectorBT's built-in indicators (exception to the OpenAlgo ta / TA-Lib rule) |
+| Loop-based | Full OpenAlgo ta (or TA-Lib, if requested) compliance, any indicator, custom metrics | Slower, needs tqdm for progress |
 
 **Prefer loop-based** for production optimization. Use broadcasting only for rapid exploration.
 

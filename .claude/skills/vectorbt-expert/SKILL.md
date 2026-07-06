@@ -12,9 +12,9 @@ user-invocable: false
 - Data sources: OpenAlgo (Indian markets), DuckDB (direct database), yfinance (US/Global), CCXT (Crypto), custom providers
 - DuckDB support: supports both custom DuckDB and OpenAlgo Historify format
 - API keys loaded from single root `.env` via `python-dotenv` + `find_dotenv()` — never hardcode keys
-- Technical indicators: **TA-Lib** (ALWAYS - never use VectorBT built-in indicators)
-- Specialty indicators: `openalgo.ta` for Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA
-- Signal cleaning: `openalgo.ta` for exrem, crossover, crossunder, flip
+- Technical indicators: **OpenAlgo ta** (DEFAULT - `from openalgo import ta`, 100+ indicators covering trend/momentum/volatility/volume/oscillators/statistical/hybrid). Use **TA-Lib** only if the user explicitly asks for TA-Lib/talib. NEVER use VectorBT built-in indicators either way.
+- Specialty indicators (no TA-Lib equivalent, always `openalgo.ta`): Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA
+- Signal cleaning: `openalgo.ta` for exrem, crossover, crossunder, flip (always, regardless of indicator library)
 - Fee model: Indian market standard (STT + statutory charges + Rs 20/order)
 - Benchmark: NIFTY 50 via OpenAlgo (`NSE_INDEX`) by default
 - Charts: Plotly with `template="plotly_dark"`
@@ -24,8 +24,8 @@ user-invocable: false
 
 ## Critical Rules
 
-1. **ALWAYS use TA-Lib** for ALL technical indicators (EMA, SMA, RSI, MACD, BBANDS, ATR, ADX, STDDEV, MOM). NEVER use `vbt.MA.run()`, `vbt.RSI.run()`, or any VectorBT built-in indicator.
-2. **Use OpenAlgo ta** for indicators NOT in TA-Lib: Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA.
+1. **Default to OpenAlgo ta** (`from openalgo import ta`) for ALL technical indicators (EMA, SMA, RSI, MACD, BBANDS, ATR, ADX, STDDEV, MOM, and 90+ more). **Only use TA-Lib if the user explicitly requests "talib"/"TA-Lib"** in their prompt. NEVER use `vbt.MA.run()`, `vbt.RSI.run()`, or any VectorBT built-in indicator with either library.
+2. **Always use OpenAlgo ta** for indicators not in TA-Lib at all: Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA - these have no TA-Lib equivalent, so they're openalgo.ta even in a TA-Lib-opt-in script.
 3. **Use OpenAlgo ta** for signal utilities: `ta.exrem()`, `ta.crossover()`, `ta.crossunder()`, `ta.flip()`. If `openalgo.ta` is not importable (standalone DuckDB), use inline `exrem()` fallback. See [duckdb-data](rules/duckdb-data.md).
 4. **Always clean signals** with `ta.exrem()` after generating raw buy/sell signals. Always `.fillna(False)` before exrem.
 5. **Market-specific fees**: India ([indian-market-costs](rules/indian-market-costs.md)), US ([us-market-costs](rules/us-market-costs.md)), Crypto ([crypto-market-costs](rules/crypto-market-costs.md)). Auto-select based on user's market.
@@ -45,8 +45,8 @@ Detailed reference for each topic is in `rules/`:
 | [data-fetching](rules/data-fetching.md) | OpenAlgo (India), yfinance (US), CCXT (Crypto), custom providers, .env setup |
 | [simulation-modes](rules/simulation-modes.md) | from_signals, from_orders, from_holding, direction types |
 | [position-sizing](rules/position-sizing.md) | Amount/Value/Percent/TargetPercent sizing |
-| [indicators-signals](rules/indicators-signals.md) | TA-Lib indicator reference, signal generation |
-| [openalgo-ta-helpers](rules/openalgo-ta-helpers.md) | OpenAlgo ta: exrem, crossover, Supertrend, Donchian, Ichimoku, MAs |
+| [indicators-signals](rules/indicators-signals.md) | OpenAlgo ta indicator reference (default), TA-Lib opt-in, signal generation |
+| [openalgo-ta-helpers](rules/openalgo-ta-helpers.md) | Complete OpenAlgo ta catalog (100+ indicators): exrem, crossover, Supertrend, Donchian, Ichimoku, MAs |
 | [stop-loss-take-profit](rules/stop-loss-take-profit.md) | Fixed SL, TP, trailing stop |
 | [parameter-optimization](rules/parameter-optimization.md) | Broadcasting and loop-based optimization |
 | [performance-analysis](rules/performance-analysis.md) | Stats, metrics, benchmark comparison, CAGR |
@@ -62,7 +62,7 @@ Detailed reference for each topic is in `rules/`:
 | [robustness-testing](rules/robustness-testing.md) | Monte Carlo, noise test, parameter sensitivity, delay test |
 | [pitfalls](rules/pitfalls.md) | Common mistakes and checklist before going live |
 | [strategy-catalog](rules/strategy-catalog.md) | Strategy reference with code snippets |
-| [quantstats-tearsheet](rules/quantstats-tearsheet.md) | QuantStats HTML reports, metrics, plots, Monte Carlo |
+| [openstatz-tearsheet](rules/openstatz-tearsheet.md) | OpenStatz HTML reports, metrics, plots, Monte Carlo (replaces QuantStats) |
 
 ## Strategy Templates (in rules/assets/)
 
@@ -92,7 +92,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 from dotenv import find_dotenv, load_dotenv
 from openalgo import api, ta
@@ -136,9 +135,9 @@ if df.index.tz is not None:
 
 close = df["close"]
 
-# --- Strategy: EMA Crossover (TA-Lib) ---
-ema_fast = pd.Series(tl.EMA(close.values, timeperiod=10), index=close.index)
-ema_slow = pd.Series(tl.EMA(close.values, timeperiod=20), index=close.index)
+# --- Strategy: EMA Crossover (OpenAlgo ta - default indicator library) ---
+ema_fast = ta.ema(close, 10)
+ema_slow = ta.ema(close, 20)
 
 buy_raw = (ema_fast > ema_slow) & (ema_fast.shift(1) <= ema_slow.shift(1))
 sell_raw = (ema_fast < ema_slow) & (ema_fast.shift(1) >= ema_slow.shift(1))
@@ -213,13 +212,22 @@ from pathlib import Path
 import duckdb
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 
 try:
+    # Default: OpenAlgo ta for both indicators and signal cleaning
     from openalgo import ta
     exrem = ta.exrem
+    ema = ta.ema
 except ImportError:
+    # Fallback ONLY when the openalgo package itself is not installed
+    # (standalone DuckDB with no OpenAlgo). Use TA-Lib for indicators
+    # and this inline exrem() replacement for signal cleaning.
+    import talib as tl
+
+    def ema(data, period):
+        return pd.Series(tl.EMA(data.values, timeperiod=period), index=data.index)
+
     def exrem(signal1, signal2):
         result = signal1.copy()
         active = False
@@ -258,5 +266,7 @@ df_5m = df.resample("5min", origin="start_day", offset="9h15min",
 }).dropna()
 close = df_5m["close"]
 
-# --- Strategy + Backtest (same as OpenAlgo template) ---
+# --- Strategy + Backtest (same as OpenAlgo template, but use the ema()/exrem() resolved above) ---
 ```
+
+If the user explicitly asks for TA-Lib, skip the `try/except` above and `import talib as tl` directly instead - the exrem fallback is only for when `openalgo` itself is unavailable.

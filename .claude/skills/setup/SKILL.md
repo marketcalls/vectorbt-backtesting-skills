@@ -51,9 +51,16 @@ If the user specified a Python version argument, use that instead of `python3`:
 $PYTHON_VERSION -m venv venv
 ```
 
-### Step 3: Install TA-Lib System Dependency
+### Step 3: TA-Lib System Dependency (Optional)
 
-TA-Lib requires a C library installed at the OS level BEFORE `pip install ta-lib`.
+**OpenAlgo ta (`from openalgo import ta`) is the default indicator library for this project - it ships 100+ indicators and needs no separate system dependency.** TA-Lib is only needed if the user wants to be able to say "use talib" for a specific backtest.
+
+Ask the user with AskUserQuestion:
+- "Do you also want TA-Lib installed for when you explicitly request it in a backtest? (Optional - OpenAlgo ta already covers the same indicators plus 90+ more)"
+  - Yes, install TA-Lib too
+  - No, skip it (recommended - install it later if ever needed)
+
+If the user skips it, skip this entire step and omit `ta-lib` from the Step 4 pip install. If the user wants it, TA-Lib requires a C library installed at the OS level BEFORE `pip install ta-lib`.
 
 **macOS:**
 ```bash
@@ -98,11 +105,13 @@ pip install TA_Lib-0.4.32-cp312-cp312-win_amd64.whl
 
 ### Step 4: Install Python Packages
 
-Install all required packages (latest versions):
+Install all required packages (latest versions). `openstatz` replaces QuantStats for tearsheets - always install it, never `quantstats`:
 
 ```bash
-pip install openalgo vectorbt plotly anywidget nbformat ta-lib pandas numpy yfinance python-dotenv tqdm scipy numba nbformat ipywidgets quantstats ccxt duckdb psutil
+pip install openalgo vectorbt plotly anywidget nbformat pandas numpy yfinance python-dotenv tqdm scipy numba nbformat ipywidgets openstatz ccxt duckdb psutil
 ```
+
+If the user opted into TA-Lib in Step 3, append `ta-lib` to this install command (after the C library is installed).
 
 ### Step 5: Create Backtesting Folder
 
@@ -172,26 +181,25 @@ Run a quick verification:
 ```bash
 python -c "
 import vectorbt as vbt
-import openalgo
+from openalgo import ta
 import plotly
-import talib
 import duckdb
 import anywidget
 import nbformat
-import quantstats as qs
+import openstatz
 from dotenv import load_dotenv
 print('All packages installed successfully')
 print(f'  vectorbt: {vbt.__version__}')
 print(f'  plotly: {plotly.__version__}')
 print(f'  duckdb: {duckdb.__version__}')
 print(f'  nbformat: {nbformat.__version__}')
-print(f'  quantstats: {qs.__version__}')
-print(f'  TA-Lib: available')
+print(f'  openstatz: {openstatz.__version__}')
+print(f'  OpenAlgo ta: available (default indicator library)')
 print(f'  python-dotenv: available')
 "
 ```
 
-If TA-Lib import fails, inform the user that the C library needs to be installed first (see Step 3).
+If the user opted into TA-Lib, also verify with `python -c "import talib; print('TA-Lib available')"`. If that import fails, inform the user that the C library needs to be installed first (see Step 3).
 
 ### Step 8: Print Summary
 

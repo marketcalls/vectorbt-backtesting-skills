@@ -1,7 +1,7 @@
 """
 Walk-Forward Analysis Template - VectorBT + OpenAlgo
 Optimizes EMA parameters on in-sample, validates on out-of-sample, rolls forward.
-Indicators: TA-Lib exclusively.
+Indicators: OpenAlgo ta (default indicator library; swap to TA-Lib only if requested).
 Fees: Indian delivery equity model (0.111% + Rs 20/order).
 """
 
@@ -11,7 +11,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -72,8 +71,8 @@ print(f"Data loaded: {len(df)} bars from {df.index[0].date()} to {df.index[-1].d
 
 def run_ema_backtest(close_slice, fast_period, slow_period):
     """Run a single EMA crossover backtest on a data slice."""
-    ema_f = pd.Series(tl.EMA(close_slice.values, timeperiod=fast_period), index=close_slice.index)
-    ema_s = pd.Series(tl.EMA(close_slice.values, timeperiod=slow_period), index=close_slice.index)
+    ema_f = ta.ema(close_slice, fast_period)
+    ema_s = ta.ema(close_slice, slow_period)
 
     buy_raw = (ema_f > ema_s) & (ema_f.shift(1) <= ema_s.shift(1))
     sell_raw = (ema_f < ema_s) & (ema_f.shift(1) >= ema_s.shift(1))

@@ -7,7 +7,7 @@ Compares strategy performance across different cost models:
   4. Indian intraday equity
   5. Indian F&O futures
 Shows the real impact of transaction costs on strategy profitability.
-Indicators: TA-Lib exclusively.
+Indicators: OpenAlgo ta (default indicator library; swap to TA-Lib only if requested).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
 
@@ -17,7 +17,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 import plotly.graph_objects as go
 from dotenv import find_dotenv, load_dotenv
@@ -88,9 +87,9 @@ if df.index.tz is not None:
 
 close = df["close"]
 
-# --- Generate Signals (TA-Lib EMA) ---
-ema_fast = pd.Series(tl.EMA(close.values, timeperiod=FAST_EMA), index=close.index)
-ema_slow = pd.Series(tl.EMA(close.values, timeperiod=SLOW_EMA), index=close.index)
+# --- Generate Signals (OpenAlgo ta EMA) ---
+ema_fast = ta.ema(close, FAST_EMA)
+ema_slow = ta.ema(close, SLOW_EMA)
 
 buy_raw = (ema_fast > ema_slow) & (ema_fast.shift(1) <= ema_slow.shift(1))
 sell_raw = (ema_fast < ema_slow) & (ema_fast.shift(1) >= ema_slow.shift(1))

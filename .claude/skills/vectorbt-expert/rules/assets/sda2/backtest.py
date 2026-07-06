@@ -1,7 +1,7 @@
 """
 SDA2 Trend Following Backtest - VectorBT + OpenAlgo
 Strategy: WMA-based channel with STDDEV and ATR bands.
-Indicators: TA-Lib WMA, STDDEV, ATR.
+Indicators: OpenAlgo ta WMA, STDDEV, ATR (default indicator library).
 Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
@@ -12,7 +12,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 from dotenv import find_dotenv, load_dotenv
 from openalgo import api, ta
@@ -60,12 +59,12 @@ high = df["high"]
 low = df["low"]
 open_price = df["open"]
 
-# --- Strategy: SDA2 Trend Following (TA-Lib) ---
+# --- Strategy: SDA2 Trend Following (OpenAlgo ta) ---
 base = ((high + low) / 2.0) + (open_price - close)
-derived = pd.Series(tl.WMA(base.astype(float).values, timeperiod=3), index=close.index)
+derived = ta.wma(base, 3)
 
-sd7 = pd.Series(tl.STDDEV(derived.values, timeperiod=7, nbdev=1.0), index=close.index)
-atr2 = pd.Series(tl.ATR(high.values, low.values, close.values, timeperiod=2), index=close.index)
+sd7 = ta.stdev(derived, 7)
+atr2 = ta.atr(high, low, close, period=2)
 
 upper = derived + sd7 + (atr2 / 1.5)
 lower = derived - sd7 - (atr2 / 1.0)

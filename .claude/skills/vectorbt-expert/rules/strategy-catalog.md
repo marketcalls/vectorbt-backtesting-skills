@@ -7,7 +7,7 @@ metadata:
 
 # Strategy Catalog
 
-All strategies use `openalgo.ta` helpers for signal cleaning. Each strategy has a production-ready template in the `assets/` directory.
+All strategies use `openalgo.ta` for indicators (default) and signal cleaning. Switch indicators to TA-Lib only if the user explicitly asks for it - see [indicators-signals](./indicators-signals.md). Each strategy has a production-ready template in the `assets/` directory.
 
 ## 1. EMA Crossover
 
@@ -17,10 +17,9 @@ Template: [assets/ema_crossover/backtest.py](./assets/ema_crossover/backtest.py)
 
 ```python
 from openalgo import ta
-import talib as tl
 
-ema_fast = pd.Series(tl.EMA(close.values, timeperiod=10), index=close.index)
-ema_slow = pd.Series(tl.EMA(close.values, timeperiod=20), index=close.index)
+ema_fast = ta.ema(close, 10)
+ema_slow = ta.ema(close, 20)
 
 buy_raw = (ema_fast > ema_slow) & (ema_fast.shift(1) <= ema_slow.shift(1))
 sell_raw = (ema_fast < ema_slow) & (ema_fast.shift(1) >= ema_slow.shift(1))
@@ -55,12 +54,11 @@ Uses MOM + MOM-of-MOM for directional confirmation with next-bar fill.
 Template: [assets/momentum/backtest.py](./assets/momentum/backtest.py)
 
 ```python
-import talib as tl
 from openalgo import ta
 
 LENGTH = 12
-mom0 = pd.Series(tl.MOM(close.values, timeperiod=LENGTH), index=close.index)
-mom1 = pd.Series(tl.MOM(mom0.values, timeperiod=1), index=close.index)
+mom0 = ta.mom(close, LENGTH)
+mom1 = ta.mom(mom0, 1)
 
 cond_long = (mom0 > 0) & (mom1 > 0)
 cond_short = (mom0 < 0) & (mom1 < 0)
@@ -86,11 +84,9 @@ MACD zero-line defines regimes; entry on breakout of signal candle.
 Template: [assets/macd/backtest.py](./assets/macd/backtest.py)
 
 ```python
-import talib as tl
 from openalgo import ta
 
-macd, macd_signal, macd_hist = tl.MACD(close.values, fastperiod=12, slowperiod=26, signalperiod=9)
-macd_series = pd.Series(macd, index=close.index)
+macd_series, macd_signal, macd_hist = ta.macd(close, fast_period=12, slow_period=26, signal_period=9)
 zero = pd.Series(0.0, index=close.index)
 
 bull_flip = ta.crossover(macd_series, zero)
@@ -119,14 +115,13 @@ WMA-based channel with STDDEV and ATR bands.
 Template: [assets/sda2/backtest.py](./assets/sda2/backtest.py)
 
 ```python
-import talib as tl
 from openalgo import ta
 
 base = ((high + low) / 2.0) + (df["open"] - close)
-derived = pd.Series(tl.WMA(base.astype(float).values, timeperiod=3), index=close.index)
+derived = ta.wma(base, 3)
 
-sd7 = pd.Series(tl.STDDEV(derived.values, timeperiod=7, nbdev=1.0), index=close.index)
-atr2 = pd.Series(tl.ATR(high.values, low.values, close.values, timeperiod=2), index=close.index)
+sd7 = ta.stdev(derived, 7)
+atr2 = ta.atr(high, low, close, period=2)
 
 upper = derived + sd7 + (atr2 / 1.5)
 lower = derived - sd7 - (atr2 / 1.0)

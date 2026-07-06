@@ -23,7 +23,6 @@ If out-of-sample performance is consistently positive, the strategy has real edg
 The simplest form: split data into training (in-sample) and testing (out-of-sample):
 
 ```python
-import talib as tl
 from openalgo import ta
 
 # Split data: 70% train, 30% test
@@ -39,8 +38,8 @@ for fast in range(5, 30):
     for slow in range(20, 60):
         if fast >= slow:
             continue
-        ema_f = pd.Series(tl.EMA(close_train.values, timeperiod=fast), index=close_train.index)
-        ema_s = pd.Series(tl.EMA(close_train.values, timeperiod=slow), index=close_train.index)
+        ema_f = ta.ema(close_train, fast)
+        ema_s = ta.ema(close_train, slow)
 
         buy_raw = (ema_f > ema_s) & (ema_f.shift(1) <= ema_s.shift(1))
         sell_raw = (ema_f < ema_s) & (ema_f.shift(1) >= ema_s.shift(1))
@@ -62,8 +61,8 @@ for fast in range(5, 30):
 print(f"Best in-sample params: {best_params}, Return: {best_return:.2%}")
 
 # Validate on test data with best parameters
-ema_f = pd.Series(tl.EMA(close_test.values, timeperiod=best_params['fast']), index=close_test.index)
-ema_s = pd.Series(tl.EMA(close_test.values, timeperiod=best_params['slow']), index=close_test.index)
+ema_f = ta.ema(close_test, best_params['fast'])
+ema_s = ta.ema(close_test, best_params['slow'])
 
 buy_raw = (ema_f > ema_s) & (ema_f.shift(1) <= ema_s.shift(1))
 sell_raw = (ema_f < ema_s) & (ema_f.shift(1) >= ema_s.shift(1))
@@ -86,7 +85,6 @@ print(f"Out-of-sample Sharpe: {pf_test.sharpe_ratio():.2f}")
 More rigorous: slide the optimization window forward in steps:
 
 ```python
-import talib as tl
 from openalgo import ta
 
 TRAIN_DAYS = 252 * 2    # 2 years training
@@ -108,8 +106,8 @@ while start + TRAIN_DAYS + TEST_DAYS <= len(close):
         for slow in range(20, 50):
             if fast >= slow:
                 continue
-            ema_f = pd.Series(tl.EMA(train_slice.values, timeperiod=fast), index=train_slice.index)
-            ema_s = pd.Series(tl.EMA(train_slice.values, timeperiod=slow), index=train_slice.index)
+            ema_f = ta.ema(train_slice, fast)
+            ema_s = ta.ema(train_slice, slow)
 
             buy_raw = (ema_f > ema_s) & (ema_f.shift(1) <= ema_s.shift(1))
             sell_raw = (ema_f < ema_s) & (ema_f.shift(1) >= ema_s.shift(1))
@@ -129,8 +127,8 @@ while start + TRAIN_DAYS + TEST_DAYS <= len(close):
                 best_fast, best_slow = fast, slow
 
     # Test on out-of-sample window
-    ema_f = pd.Series(tl.EMA(test_slice.values, timeperiod=best_fast), index=test_slice.index)
-    ema_s = pd.Series(tl.EMA(test_slice.values, timeperiod=best_slow), index=test_slice.index)
+    ema_f = ta.ema(test_slice, best_fast)
+    ema_s = ta.ema(test_slice, best_slow)
 
     buy_raw = (ema_f > ema_s) & (ema_f.shift(1) <= ema_s.shift(1))
     sell_raw = (ema_f < ema_s) & (ema_f.shift(1) >= ema_s.shift(1))

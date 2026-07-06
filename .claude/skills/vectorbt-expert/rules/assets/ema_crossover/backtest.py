@@ -1,7 +1,7 @@
 """
 EMA Crossover Backtest - VectorBT + OpenAlgo
 Strategy: Buy when Fast EMA crosses above Slow EMA, sell on cross below.
-Indicators: TA-Lib EMA exclusively.
+Indicators: OpenAlgo ta EMA (default indicator library; swap to TA-Lib only if requested).
 Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
@@ -12,7 +12,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 from dotenv import find_dotenv, load_dotenv
 from openalgo import api, ta
@@ -62,9 +61,9 @@ if df.index.tz is not None:
 close = df["close"]
 print(f"Data loaded: {len(df)} bars from {df.index[0].date()} to {df.index[-1].date()}")
 
-# --- Strategy: EMA Crossover (TA-Lib) ---
-ema_fast = pd.Series(tl.EMA(close.values, timeperiod=FAST_EMA), index=close.index)
-ema_slow = pd.Series(tl.EMA(close.values, timeperiod=SLOW_EMA), index=close.index)
+# --- Strategy: EMA Crossover (OpenAlgo ta) ---
+ema_fast = ta.ema(close, FAST_EMA)
+ema_slow = ta.ema(close, SLOW_EMA)
 
 buy_raw = (ema_fast > ema_slow) & (ema_fast.shift(1) <= ema_slow.shift(1))
 sell_raw = (ema_fast < ema_slow) & (ema_fast.shift(1) >= ema_slow.shift(1))

@@ -4,7 +4,7 @@ Strategy: Weekly RSI-based slab-wise accumulation of NIFTYBEES.
           Buy on Friday 3:15 PM when weekly NIFTY RSI < 68.
           Slab allocation: RSI 50-68 = 5%, RSI 30-50 = 10%, RSI <30 = 20%.
           Exit all when weekly RSI > 70.
-Indicators: TA-Lib RSI.
+Indicators: OpenAlgo ta RSI (default indicator library).
 Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
@@ -15,12 +15,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from dotenv import find_dotenv, load_dotenv
-from openalgo import api
+from openalgo import api, ta
 
 # --- Config ---
 script_dir = Path(__file__).resolve().parent
@@ -90,12 +89,9 @@ if df_nifty.index.tz is not None:
     df_nifty.index = df_nifty.index.tz_convert(None)
 print(f"  NIFTY Daily:   {len(df_nifty)} bars from {df_nifty.index[0]} to {df_nifty.index[-1]}")
 
-# --- Compute Weekly RSI (TA-Lib) ---
+# --- Compute Weekly RSI (OpenAlgo ta) ---
 nifty_weekly_close = df_nifty["close"].resample("W-FRI").last().dropna()
-rsi_weekly = pd.Series(
-    tl.RSI(nifty_weekly_close.values, timeperiod=RSI_WINDOW),
-    index=nifty_weekly_close.index,
-)
+rsi_weekly = ta.rsi(nifty_weekly_close, RSI_WINDOW)
 
 # Shift by 1 week: use PREVIOUS week's completed RSI (avoid lookahead)
 rsi_weekly_prev = rsi_weekly.shift(1)

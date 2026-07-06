@@ -18,7 +18,7 @@ Generate a quick inline backtest and print stats. Do NOT create a file - output 
 Generate a single code block the user can paste into a Jupyter cell or run as a script. The code must:
 
 1. Fetch data from OpenAlgo (or DuckDB if user provides a DB path, or yfinance as fallback)
-2. **Use TA-Lib** for EMA 10/20 crossover (never VectorBT built-in)
+2. **Use OpenAlgo ta** for EMA 10/20 crossover by default (never VectorBT built-in); only use TA-Lib if the user explicitly says "talib"/"TA-Lib"
 3. Clean signals with `ta.exrem()` (always `.fillna(False)` before exrem)
 4. Use **Indian delivery fees**: `fees=0.00111, fixed_fees=20`
 5. Fetch **NIFTY benchmark** via OpenAlgo (`symbol="NIFTY", exchange="NSE_INDEX"`)

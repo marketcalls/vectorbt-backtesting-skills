@@ -1,7 +1,7 @@
 """
 RSI Backtest - VectorBT + OpenAlgo
 Strategy: Buy when RSI crosses below oversold, sell when RSI crosses above overbought.
-Indicators: TA-Lib RSI exclusively.
+Indicators: OpenAlgo ta RSI (default indicator library; swap to TA-Lib only if requested).
 Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
@@ -12,7 +12,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 from dotenv import find_dotenv, load_dotenv
 from openalgo import api, ta
@@ -63,8 +62,8 @@ if df.index.tz is not None:
 close = df["close"]
 print(f"Data loaded: {len(df)} bars from {df.index[0].date()} to {df.index[-1].date()}")
 
-# --- Strategy: RSI (TA-Lib) ---
-rsi = pd.Series(tl.RSI(close.values, timeperiod=RSI_PERIOD), index=close.index)
+# --- Strategy: RSI (OpenAlgo ta) ---
+rsi = ta.rsi(close, RSI_PERIOD)
 
 buy_raw = (rsi < RSI_OVERSOLD) & (rsi.shift(1) >= RSI_OVERSOLD)
 sell_raw = (rsi > RSI_OVERBOUGHT) & (rsi.shift(1) <= RSI_OVERBOUGHT)

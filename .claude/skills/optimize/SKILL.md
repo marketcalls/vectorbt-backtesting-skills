@@ -27,8 +27,8 @@ If no arguments, ask the user which strategy to optimize.
    - Load `.env` from project root using `find_dotenv()` and fetch data via OpenAlgo `client.history()`
    - If user provides a DuckDB path, load data directly via `duckdb.connect(path, read_only=True)`. See vectorbt-expert `rules/duckdb-data.md`.
    - If `openalgo.ta` is not importable (standalone DuckDB), use inline `exrem()` fallback.
-   - **Use TA-Lib for ALL indicators** (never VectorBT built-in)
-   - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, etc.)
+   - **Use OpenAlgo ta for ALL indicators by default** (never VectorBT built-in). Only switch to TA-Lib if the user explicitly says "talib"/"TA-Lib"
+   - **Always use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, etc.) - no TA-Lib equivalent exists
    - Use `ta.exrem()` to clean signals (always `.fillna(False)` before exrem)
    - Define sensible parameter ranges for the chosen strategy
    - Use loop-based optimization to collect multiple metrics per combo

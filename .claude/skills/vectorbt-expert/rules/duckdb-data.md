@@ -224,9 +224,35 @@ df_wide["datetime"] = pd.to_datetime(df_wide["dt"])
 df_wide = df_wide.set_index("datetime").drop(columns=["dt"])
 ```
 
-## Signal Utilities Without openalgo.ta
+## Indicators and Signal Utilities Without openalgo.ta
 
-When using standalone DuckDB (without OpenAlgo installed), implement signal helpers inline:
+Indicators default to `openalgo.ta` project-wide (see [indicators-signals](./indicators-signals.md)). If the standalone DuckDB environment does not have the `openalgo` package installed at all, fall back to TA-Lib for indicators instead - this is the one case where TA-Lib is used without the user explicitly requesting it, since there is no other indicator source available:
+
+```python
+try:
+    from openalgo import ta
+    ema = ta.ema
+    exrem = ta.exrem
+except ImportError:
+    import talib as tl
+
+    def ema(data, period):
+        return pd.Series(tl.EMA(data.values, timeperiod=period), index=data.index)
+
+    def exrem(signal1, signal2):
+        result = signal1.copy()
+        active = False
+        for i in range(len(signal1)):
+            if active:
+                result.iloc[i] = False
+            if signal1.iloc[i] and not active:
+                active = True
+            if signal2.iloc[i]:
+                active = False
+        return result
+```
+
+When using standalone DuckDB (without OpenAlgo installed) and only the signal helper is needed, implement it inline:
 
 ```python
 def exrem(signal1, signal2):

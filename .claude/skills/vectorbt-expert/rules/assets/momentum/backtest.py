@@ -1,7 +1,7 @@
 """
 Double Momentum Backtest - VectorBT + OpenAlgo
 Strategy: MOM + MOM-of-MOM for directional confirmation with next-bar fill.
-Indicators: TA-Lib MOM.
+Indicators: OpenAlgo ta MOM (default indicator library; TA-Lib-compatible ta.mom()).
 Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
@@ -12,7 +12,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 from dotenv import find_dotenv, load_dotenv
 from openalgo import api, ta
@@ -60,9 +59,9 @@ close = df["close"]
 high = df["high"]
 low = df["low"]
 
-# --- Strategy: Double Momentum (TA-Lib) ---
-mom0 = pd.Series(tl.MOM(close.values, timeperiod=MOM_LENGTH), index=close.index)
-mom1 = pd.Series(tl.MOM(mom0.values, timeperiod=1), index=close.index)
+# --- Strategy: Double Momentum (OpenAlgo ta) ---
+mom0 = ta.mom(close, MOM_LENGTH)
+mom1 = ta.mom(mom0, 1)
 
 cond_long = (mom0 > 0) & (mom1 > 0)
 

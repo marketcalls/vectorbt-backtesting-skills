@@ -59,7 +59,6 @@ def monte_carlo_trades(pf, n_simulations=1000, seed=42):
 Add random noise to price data and re-run the strategy. If results collapse, the strategy was fit to specific price noise:
 
 ```python
-import talib as tl
 from openalgo import ta
 
 def noise_test(close, high, low, run_strategy_fn, n_tests=100, noise_pct=0.001, seed=42):
@@ -90,8 +89,8 @@ def noise_test(close, high, low, run_strategy_fn, n_tests=100, noise_pct=0.001, 
 # Example: Define strategy function that returns metrics dict
 def run_ema_strategy(close_series, high_series, low_series):
     close_s = pd.Series(close_series, index=close.index) if not isinstance(close_series, pd.Series) else close_series
-    ema_f = pd.Series(tl.EMA(close_s.values, timeperiod=10), index=close_s.index)
-    ema_s = pd.Series(tl.EMA(close_s.values, timeperiod=20), index=close_s.index)
+    ema_f = ta.ema(close_s, 10)
+    ema_s = ta.ema(close_s, 20)
     buy_raw = (ema_f > ema_s) & (ema_f.shift(1) <= ema_s.shift(1))
     sell_raw = (ema_f < ema_s) & (ema_f.shift(1) >= ema_s.shift(1))
     entries = ta.exrem(buy_raw.fillna(False), sell_raw.fillna(False))
@@ -117,7 +116,6 @@ def run_ema_strategy(close_series, high_series, low_series):
 Test parameters near the optimal values. Robust strategies have broad profitable regions:
 
 ```python
-import talib as tl
 from openalgo import ta
 
 def parameter_sensitivity(close, best_fast, best_slow, delta=3):
@@ -127,8 +125,8 @@ def parameter_sensitivity(close, best_fast, best_slow, delta=3):
         for slow in range(best_slow - delta, best_slow + delta + 1):
             if fast >= slow or fast < 2:
                 continue
-            ema_f = pd.Series(tl.EMA(close.values, timeperiod=fast), index=close.index)
-            ema_s = pd.Series(tl.EMA(close.values, timeperiod=slow), index=close.index)
+            ema_f = ta.ema(close, fast)
+            ema_s = ta.ema(close, slow)
             buy_raw = (ema_f > ema_s) & (ema_f.shift(1) <= ema_s.shift(1))
             sell_raw = (ema_f < ema_s) & (ema_f.shift(1) >= ema_s.shift(1))
             entries = ta.exrem(buy_raw.fillna(False), sell_raw.fillna(False))

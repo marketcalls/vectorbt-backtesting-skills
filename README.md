@@ -2,7 +2,7 @@
 
 A comprehensive collection of backtesting skills for trading strategies using VectorBT. Works with **40+ AI coding agents** via [skills.sh](https://github.com/vercel-labs/skills) — including Claude Code, Cursor, Codex, OpenCode, Cline, Windsurf, GitHub Copilot, Gemini CLI, Roo Code, and more.
 
-Supports **Indian markets**, **US markets**, and **Crypto markets** with realistic transaction cost modeling, TA-Lib indicators, market-specific benchmarking, QuantStats tearsheets, and robustness testing. Broker-neutral by design — fee models use industry-standard references that can be customized for any broker.
+Supports **Indian markets**, **US markets**, and **Crypto markets** with realistic transaction cost modeling, OpenAlgo indicators (100+, TA-Lib available on request), market-specific benchmarking, OpenStatz tearsheets, and robustness testing. Broker-neutral by design — fee models use industry-standard references that can be customized for any broker.
 
 ## Quick Install
 
@@ -73,9 +73,9 @@ The `npx skills add` command detects which agents you have installed and places 
 
 | Command | What It Does |
 |---------|-------------|
-| `/setup` | Detects OS, creates venv, installs TA-Lib + all packages, creates `backtesting/` folders, configures `.env` with API keys |
-| `/backtest` | Generates a complete backtest script with signals, market-specific fees, benchmark comparison, plain-language report, QuantStats tearsheet |
-| `/optimize` | Parameter grid search with TA-Lib indicators, tqdm progress bars, Plotly heatmaps, best params vs benchmark |
+| `/setup` | Detects OS, creates venv, installs OpenAlgo + all packages (TA-Lib optional), creates `backtesting/` folders, configures `.env` with API keys |
+| `/backtest` | Generates a complete backtest script with signals, market-specific fees, benchmark comparison, plain-language report, OpenStatz tearsheet |
+| `/optimize` | Parameter grid search with OpenAlgo ta indicators, tqdm progress bars, Plotly heatmaps, best params vs benchmark |
 | `/quick-stats` | Inline code block (no file) — fetch data, run EMA crossover, print compact stats + benchmark alpha |
 | `/strategy-compare` | Side-by-side comparison of multiple strategies on same symbol, overlaid equity curves |
 
@@ -101,16 +101,16 @@ The `npx skills add` command detects which agents you have installed and places 
 | Category | What's Covered |
 |----------|---------------|
 | **Data** | OpenAlgo (India), yfinance (US/Global), CCXT (Crypto), custom providers, `.env` + `python-dotenv`, CSV loading, resampling |
-| **Indicators** | TA-Lib mandatory (EMA, SMA, RSI, MACD, BBands, ATR, ADX, STDDEV, MOM). OpenAlgo ta for Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA |
+| **Indicators** | OpenAlgo ta by default - 100+ indicators (EMA, SMA, RSI, MACD, BBands, ATR, ADX, STDDEV, MOM, Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA, oscillators, statistical, hybrid). TA-Lib only if explicitly requested |
 | **Signals** | `ta.exrem()` signal cleaning, `ta.crossover()`, `ta.crossunder()`, `ta.flip()` regime detection |
 | **Simulation** | `from_signals`, `from_orders`, `from_holding`, long/short/both directions |
 | **Sizing** | Percent, Value, TargetPercent, whole shares (`min_size=1`), futures lot sizes, fractional crypto |
 | **Costs** | **India**: 4-segment model (Delivery 0.111%, Intraday 0.0225%, Futures 0.018%, Options 0.098%). **US**: Per-share + per-contract model (Stocks ~0.01%, Options ~0.2%, Futures ~0.001%). **Crypto**: Maker/taker model (Spot 0.1%, Futures 0.02%/0.05%, funding rates). All customizable. |
 | **Futures** | SEBI revised lot sizes (Dec 2025): NIFTY=65, BANKNIFTY=30, FINNIFTY=60. US: E-mini/Micro contract specs |
 | **Risk** | Stop loss, take profit, trailing stop (`sl_trail`) |
-| **Optimization** | Loop-based (TA-Lib compliant) + broadcasting (vbt.MA exception for parameter sweeps) |
+| **Optimization** | Loop-based (OpenAlgo ta / TA-Lib compliant) + broadcasting (vbt.MA exception for parameter sweeps) |
 | **Benchmarking** | India: NIFTY 50 via OpenAlgo. US: S&P 500 (`^GSPC`). Crypto: Bitcoin (`BTC-USD`). Strategy vs Benchmark table always produced |
-| **Reporting** | Plain-language backtest explanation for normal traders. QuantStats HTML tearsheets with 30+ metrics, Monte Carlo simulations |
+| **Reporting** | Plain-language backtest explanation for normal traders. OpenStatz HTML tearsheets with 30+ metrics, Monte Carlo simulations |
 | **Plotting** | Plotly dark theme, candlestick with `xaxis type="category"` (no weekend gaps), VectorBT 7-panel plot pack |
 | **Validation** | Walk-forward analysis (WFE ratio), robustness testing (Monte Carlo trade shuffle, noise injection, parameter sensitivity, entry/exit delay, cross-symbol validation) |
 | **Safety** | 10 common pitfalls with prevention, checklist before going live |
@@ -161,12 +161,13 @@ python -m venv venv
 source venv/bin/activate   # Linux/Mac
 # venv\Scripts\activate    # Windows
 
-# Install TA-Lib C library first
+# Install Python packages (OpenAlgo ta is the default indicator library - no C library needed)
+pip install openalgo vectorbt plotly anywidget nbformat pandas numpy yfinance python-dotenv tqdm scipy numba ipywidgets openstatz ccxt
+
+# Optional: only if you want to be able to request TA-Lib explicitly in a backtest
 brew install ta-lib         # macOS
 # sudo apt install libta-lib-dev  # Linux
-
-# Install Python packages
-pip install openalgo vectorbt plotly anywidget nbformat ta-lib pandas numpy yfinance python-dotenv tqdm scipy numba ipywidgets quantstats ccxt
+pip install ta-lib
 ```
 
 ### 4. Configure API Keys
@@ -189,7 +190,7 @@ Detects OS, creates venv, installs dependencies, creates folder structure, and c
 
 ### `/backtest` - Quick Backtest
 
-Create a complete backtest script with market-specific fees, benchmark comparison, plain-language report, and QuantStats tearsheet.
+Create a complete backtest script with market-specific fees, benchmark comparison, plain-language report, and OpenStatz tearsheet.
 
 ```
 # Indian Markets
@@ -270,23 +271,26 @@ Realistic fee models for each market, auto-selected based on the asset. All fee 
 
 > **Using a different broker?** Simply override the fee constants in your backtest script. The rule files include detailed breakdowns (STT, exchange fees, regulatory fees, clearing fees) so you can recalculate for any broker.
 
-### TA-Lib Indicators (Mandatory)
+### OpenAlgo ta Indicators (Default)
 
-All strategies use TA-Lib for technical indicators. VectorBT built-in indicators are never used.
+All strategies use `openalgo.ta` for technical indicators by default - 100+ indicators across trend, momentum, volatility, volume, oscillators, statistical, and hybrid categories. VectorBT built-in indicators are never used.
+
+```python
+from openalgo import ta
+ema_fast = ta.ema(close, 10)
+st_line, st_direction = ta.supertrend(high, low, close, period=10, multiplier=3.0)
+entries = ta.exrem(buy_raw.fillna(False), sell_raw.fillna(False))
+```
+
+Specialty indicators with no TA-Lib equivalent (Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA) plus signal utilities (`exrem`, `crossover`, `crossunder`, `flip`) always come from `openalgo.ta`.
+
+### TA-Lib (Opt-In Only)
+
+Only used when the user explicitly asks for "talib"/"TA-Lib" in their request:
 
 ```python
 import talib as tl
 ema_fast = pd.Series(tl.EMA(close.values, timeperiod=10), index=close.index)
-```
-
-### OpenAlgo TA for Specialty Indicators
-
-Supertrend, Donchian, Ichimoku, HMA, KAMA, ALMA, ZLEMA, VWMA — plus signal utilities (exrem, crossover, crossunder, flip).
-
-```python
-from openalgo import ta
-st_line, st_direction = ta.supertrend(high, low, close, period=10, multiplier=3.0)
-entries = ta.exrem(buy_raw.fillna(False), sell_raw.fillna(False))
 ```
 
 ### Market-Specific Benchmarks
@@ -299,13 +303,13 @@ entries = ta.exrem(buy_raw.fillna(False), sell_raw.fillna(False))
 
 Every backtest produces a Strategy vs Benchmark comparison table.
 
-### QuantStats Tearsheets
+### OpenStatz Tearsheets
 
-Professional HTML reports with 30+ metrics, drawdown analysis, rolling statistics, monthly heatmaps, and Monte Carlo simulations.
+Professional HTML reports with 30+ metrics, drawdown analysis, rolling statistics, monthly heatmaps, and Monte Carlo simulations. OpenStatz replaces QuantStats project-wide - it's a numerically-verified drop-in rebuild with the same API.
 
 ```python
-import quantstats as qs
-qs.reports.html(pf.returns(), benchmark="^NSEI", output="tearsheet.html")
+import openstatz as ostz  # alias as ostz, not os - avoids shadowing the stdlib os module
+ostz.reports.html(pf.returns(), benchmark="^NSEI", output="tearsheet.html")
 ```
 
 ### Plain-Language Report Explanation
@@ -398,7 +402,7 @@ backtesting/
 │               ├── robustness-testing.md
 │               ├── pitfalls.md
 │               ├── strategy-catalog.md
-│               ├── quantstats-tearsheet.md
+│               ├── openstatz-tearsheet.md
 │               └── assets/           # Production-ready templates
 │                   ├── ema_crossover/backtest.py
 │                   ├── rsi/backtest.py
@@ -436,8 +440,8 @@ backtesting/
 | `data-fetching.md` | OpenAlgo (India), yfinance (US), CCXT (Crypto), custom providers, `.env` setup |
 | `simulation-modes.md` | from_signals, from_orders, from_holding, direction types |
 | `position-sizing.md` | Amount/Value/Percent/TargetPercent sizing, whole shares |
-| `indicators-signals.md` | TA-Lib mandatory indicator reference, signal generation |
-| `openalgo-ta-helpers.md` | OpenAlgo ta: exrem, crossover, Supertrend, Donchian, Ichimoku, MAs |
+| `indicators-signals.md` | OpenAlgo ta indicator reference (default), TA-Lib opt-in, signal generation |
+| `openalgo-ta-helpers.md` | Complete OpenAlgo ta catalog (100+ indicators): exrem, crossover, Supertrend, Donchian, Ichimoku, MAs |
 | `stop-loss-take-profit.md` | Fixed SL, TP, trailing stop configurations |
 | `parameter-optimization.md` | Broadcasting and loop-based optimization, heatmaps |
 | `performance-analysis.md` | Stats, metrics, benchmark comparison, CAGR calculation |
@@ -452,7 +456,7 @@ backtesting/
 | `robustness-testing.md` | Monte Carlo, noise test, parameter sensitivity, delay test |
 | `pitfalls.md` | 10 common mistakes and checklist before going live |
 | `strategy-catalog.md` | All strategy types with code snippets and asset references |
-| `quantstats-tearsheet.md` | QuantStats HTML reports, 30+ metrics, Monte Carlo |
+| `openstatz-tearsheet.md` | OpenStatz HTML reports, 30+ metrics, Monte Carlo (replaces QuantStats) |
 
 ## Data Sources
 

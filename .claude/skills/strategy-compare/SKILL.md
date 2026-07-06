@@ -26,8 +26,8 @@ If "long-vs-short" is one of the strategies, compare longonly vs shortonly vs bo
    - Fetch data once via OpenAlgo
    - If user provides a DuckDB path, load data directly via `duckdb.connect(path, read_only=True)`. See vectorbt-expert `rules/duckdb-data.md`.
    - If `openalgo.ta` is not importable (standalone DuckDB), use inline `exrem()` fallback.
-   - **Use TA-Lib for ALL indicators** (never VectorBT built-in)
-   - **Use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, etc.)
+   - **Use OpenAlgo ta for ALL indicators by default** (never VectorBT built-in). Only switch to TA-Lib if the user explicitly says "talib"/"TA-Lib"
+   - **Always use OpenAlgo ta** for specialty indicators (Supertrend, Donchian, etc.) - no TA-Lib equivalent exists
    - Clean signals with `ta.exrem()` (always `.fillna(False)` before exrem)
    - Run each strategy on the same data
    - **Indian delivery fees**: `fees=0.00111, fixed_fees=20` for delivery equity

@@ -1,7 +1,7 @@
 """
 MACD Signal-Candle Breakout Backtest - VectorBT + OpenAlgo
 Strategy: MACD zero-line defines bull/bear regimes. Entry on breakout of signal candle.
-Indicators: TA-Lib MACD, openalgo.ta helpers.
+Indicators: OpenAlgo ta MACD (default indicator library) + openalgo.ta signal helpers.
 Fees: Indian delivery equity model (0.111% + Rs 20/order).
 Benchmark: NIFTY 50 Index via OpenAlgo (NSE_INDEX).
 """
@@ -12,7 +12,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import talib as tl
 import vectorbt as vbt
 from dotenv import find_dotenv, load_dotenv
 from openalgo import api, ta
@@ -65,11 +64,10 @@ high = df["high"]
 low = df["low"]
 print(f"Data loaded: {len(df)} bars from {df.index[0].date()} to {df.index[-1].date()}")
 
-# --- Strategy: MACD Signal-Candle Breakout (TA-Lib) ---
-macd, macd_signal_line, macd_hist = tl.MACD(
-    close.values, fastperiod=MACD_FAST, slowperiod=MACD_SLOW, signalperiod=MACD_SIGNAL
+# --- Strategy: MACD Signal-Candle Breakout (OpenAlgo ta) ---
+macd_series, macd_signal_line, macd_hist = ta.macd(
+    close, fast_period=MACD_FAST, slow_period=MACD_SLOW, signal_period=MACD_SIGNAL
 )
-macd_series = pd.Series(macd, index=close.index)
 zero = pd.Series(0.0, index=close.index)
 
 # MACD zero-line flips define regimes
