@@ -179,7 +179,7 @@ try:
         benchmark=benchmark,
         output=str(tearsheet_file),
         title=f"{SYMBOL} - Strategy Tearsheet",
-        open_browser=False,
+        open_browser=True,   # opens the tearsheet in the browser after each run
     )
     print(f"\nOpenStatz tearsheet saved to {tearsheet_file}")
 
