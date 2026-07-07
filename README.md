@@ -305,11 +305,14 @@ Every backtest produces a Strategy vs Benchmark comparison table.
 
 ### OpenStatz Tearsheets
 
-Professional HTML reports with 30+ metrics, drawdown analysis, rolling statistics, monthly heatmaps, and Monte Carlo simulations. OpenStatz replaces QuantStats project-wide - it's a numerically-verified drop-in rebuild with the same API.
+A modern interactive tearsheet with 30+ metrics, drawdown analysis, rolling statistics, monthly heatmaps, and Monte Carlo simulations. `ostz.dashboard(...)` renders the same interactive dashboard as `openstatz serve` into a single self-contained offline HTML file - no server, no `[app]` extra, no network. OpenStatz replaces QuantStats project-wide and keeps a numerical-parity contract on its metrics.
 
 ```python
 import openstatz as ostz  # alias as ostz, not os - avoids shadowing the stdlib os module
-ostz.reports.html(pf.returns(), benchmark="^NSEI", output="tearsheet.html")
+
+# dashboard() needs the benchmark as a returns Series (not a ticker string)
+benchmark = ostz.providers.download_returns("^NSEI").reindex(pf.returns().index).fillna(0)
+ostz.dashboard(pf.returns(), benchmark=benchmark, output="tearsheet.html")
 ```
 
 ### Plain-Language Report Explanation
@@ -456,7 +459,7 @@ backtesting/
 | `robustness-testing.md` | Monte Carlo, noise test, parameter sensitivity, delay test |
 | `pitfalls.md` | 10 common mistakes and checklist before going live |
 | `strategy-catalog.md` | All strategy types with code snippets and asset references |
-| `openstatz-tearsheet.md` | OpenStatz HTML reports, 30+ metrics, Monte Carlo (replaces QuantStats) |
+| `openstatz-tearsheet.md` | OpenStatz interactive offline dashboard, 30+ metrics, Monte Carlo (replaces QuantStats) |
 
 ## Data Sources
 

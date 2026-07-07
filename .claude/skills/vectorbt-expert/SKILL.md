@@ -62,7 +62,7 @@ Detailed reference for each topic is in `rules/`:
 | [robustness-testing](rules/robustness-testing.md) | Monte Carlo, noise test, parameter sensitivity, delay test |
 | [pitfalls](rules/pitfalls.md) | Common mistakes and checklist before going live |
 | [strategy-catalog](rules/strategy-catalog.md) | Strategy reference with code snippets |
-| [openstatz-tearsheet](rules/openstatz-tearsheet.md) | OpenStatz HTML reports, metrics, plots, Monte Carlo (replaces QuantStats) |
+| [openstatz-tearsheet](rules/openstatz-tearsheet.md) | OpenStatz interactive offline dashboard, metrics, Monte Carlo (replaces QuantStats) |
 
 ## Strategy Templates (in rules/assets/)
 

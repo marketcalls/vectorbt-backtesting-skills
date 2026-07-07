@@ -1,13 +1,19 @@
 ---
 name: openstatz-tearsheet
-description: OpenStatz tearsheet integration - HTML reports, metrics, plots, Monte Carlo simulations for portfolio analytics. OpenStatz replaces QuantStats project-wide.
+description: OpenStatz tearsheet integration - modern interactive offline dashboard, metrics, Monte Carlo for portfolio analytics. OpenStatz replaces QuantStats project-wide.
 metadata:
-  tags: openstatz, quantstats, tearsheet, report, html, metrics, plots, monte-carlo, analytics, risk
+  tags: openstatz, quantstats, tearsheet, dashboard, report, metrics, monte-carlo, analytics, risk
 ---
 
 # OpenStatz Tearsheet Integration
 
-**OpenStatz is the required tearsheet library for this project - never use QuantStats.** OpenStatz is a modern, actively-maintained rebuild of QuantStats with an enforced numerical-parity contract (`rtol=1e-9`) - same metrics, same plots, same HTML report layout, same function names under a different top-level package. Always offer to generate an OpenStatz tearsheet after every backtest.
+**OpenStatz is the required tearsheet library for this project - never use QuantStats.** OpenStatz is a modern, actively-maintained rebuild of QuantStats. Its metrics carry an enforced numerical-parity contract (`rtol=1e-9`) against QuantStats, but its tearsheet is a completely different, modern product: `ostz.dashboard(...)` renders the same interactive React dashboard that `openstatz serve` serves (live lightweight-charts, bespoke SVG stat panels) into a single self-contained offline `.html` file. Always generate the dashboard tearsheet after every backtest.
+
+**Always use `ostz.dashboard(...)` for the tearsheet - never the legacy `ostz.reports.html/full/basic/plots(...)` static matplotlib reports.** Those reproduce the old QuantStats look and are deliberately excluded from this project.
+
+## The dashboard runs standalone - no server required
+
+`ostz.dashboard(...)` does **not** need `openstatz serve`, the `[app]` FastAPI extra, or any network access. It computes the analysis with pure pandas/numpy and inlines the pre-built web UI plus the data into one offline file. The published wheel bundles that built UI, so it works on a plain `pip install openstatz`. Open the resulting `.html` in any browser - no localhost, no server.
 
 ## Installation
 
@@ -27,7 +33,7 @@ import openstatz as ostz
 
 ## Basic Usage with VectorBT
 
-After running a VectorBT backtest, extract returns and generate a tearsheet:
+After running a VectorBT backtest, extract returns and generate the dashboard tearsheet:
 
 ```python
 import openstatz as ostz
@@ -39,52 +45,59 @@ strategy_returns = pf.returns()
 if strategy_returns.index.tz is not None:
     strategy_returns.index = strategy_returns.index.tz_convert(None)
 
-# Generate full HTML tearsheet
-ostz.reports.html(strategy_returns, benchmark="^NSEI", output="tearsheet.html",
-                   title="Strategy Tearsheet")
+# dashboard() needs the benchmark as a RETURNS SERIES, not a ticker string.
+# (Unlike the removed reports.html, it does not download tickers for you.)
+benchmark = ostz.providers.download_returns("^NSEI")          # NIFTY 50
+benchmark = benchmark.reindex(strategy_returns.index).fillna(0)
+
+# Generate the modern interactive offline tearsheet
+ostz.dashboard(
+    strategy_returns,
+    benchmark=benchmark,
+    output="tearsheet.html",
+    title="Strategy Tearsheet",
+    open_browser=True,   # set False in headless/automated runs
+)
 print("Tearsheet saved to tearsheet.html")
 ```
 
 ## Benchmark Options
 
+`dashboard()` requires the benchmark as a `pd.Series` of returns. Fetch it once, align it to the strategy index, then pass the Series:
+
 ```python
 # Indian Market - NIFTY 50
-ostz.reports.html(returns, benchmark="^NSEI", output="tearsheet.html")
+benchmark = ostz.providers.download_returns("^NSEI")
 
 # US Market - S&P 500
-ostz.reports.html(returns, benchmark="SPY", output="tearsheet.html")
+benchmark = ostz.providers.download_returns("SPY")
 
-# Custom benchmark from OpenAlgo (convert to returns first)
-bench_returns = bench_close.pct_change().dropna()
-bench_returns = bench_returns.reindex(strategy_returns.index).fillna(0)
-ostz.reports.html(strategy_returns, benchmark=bench_returns, output="tearsheet.html")
+# Custom benchmark from OpenAlgo (convert close prices to returns first)
+benchmark = bench_close.pct_change().dropna()
+
+# In every case, align to the strategy index before passing:
+benchmark = benchmark.reindex(strategy_returns.index).fillna(0)
+ostz.dashboard(strategy_returns, benchmark=benchmark, output="tearsheet.html")
 ```
 
-## Report Types
+Running without a benchmark is also fine - just omit it:
 
 ```python
-import openstatz as ostz
+ostz.dashboard(strategy_returns, output="tearsheet.html", title="Strategy Tearsheet")
+```
 
-# 1. Full HTML tearsheet (RECOMMENDED - most comprehensive)
-ostz.reports.html(returns, benchmark="^NSEI", output="tearsheet.html",
-                   title="EMA Crossover - SBIN")
+## Console Metrics (numbers only, no UI)
 
-# 2. Full metrics + plots to console
-ostz.reports.full(returns, benchmark="^NSEI")
+For a plain-text metrics table in the console (e.g. logging a summary), use `reports.metrics`. This prints numbers only - it does not open a UI or produce the old static report:
 
-# 3. Basic metrics + plots to console
-ostz.reports.basic(returns)
-
-# 4. Metrics only (no plots)
-ostz.reports.metrics(returns, mode="full")       # Full metrics
-ostz.reports.metrics(returns, mode="basic")      # Basic metrics
-
-# 5. Plots only (no metrics)
-ostz.reports.plots(returns, mode="full")
-ostz.reports.plots(returns, mode="basic")
+```python
+ostz.reports.metrics(returns, mode="full")       # Full metrics table to console
+ostz.reports.metrics(returns, mode="basic")      # Basic metrics table to console
 ```
 
 ## Key Metrics (ostz.stats)
+
+Individual metric values as raw numbers - use these to build the plain-language report or a comparison table:
 
 ```python
 import openstatz as ostz
@@ -126,56 +139,21 @@ ostz.stats.outlier_win_ratio(returns)             # Outlier Win Ratio
 ostz.stats.outlier_loss_ratio(returns)            # Outlier Loss Ratio
 ```
 
-## Key Plots (ostz.plots)
-
-```python
-import openstatz as ostz
-
-returns = pf.returns()
-
-# Performance
-ostz.plots.returns(returns, benchmark="^NSEI", show=True)
-ostz.plots.log_returns(returns, benchmark="^NSEI", show=True)
-ostz.plots.yearly_returns(returns, benchmark="^NSEI", show=True)
-
-# Risk
-ostz.plots.drawdown(returns, show=True)
-ostz.plots.drawdowns_periods(returns, show=True)
-ostz.plots.distribution(returns, show=True)
-ostz.plots.histogram(returns, show=True)
-
-# Rolling
-ostz.plots.rolling_sharpe(returns, show=True)
-ostz.plots.rolling_sortino(returns, show=True)
-ostz.plots.rolling_volatility(returns, show=True)
-ostz.plots.rolling_beta(returns, benchmark="^NSEI", show=True)
-
-# Summary
-ostz.plots.snapshot(returns, title="Strategy Snapshot", show=True)
-ostz.plots.monthly_heatmap(returns, show=True)
-ostz.plots.daily_returns(returns, show=True)
-
-# Monte Carlo
-ostz.plots.montecarlo(returns, sims=1000, show=True)
-ostz.plots.montecarlo_distribution(returns, sims=1000, show=True)
-```
+All of these charts are already rendered interactively inside the `ostz.dashboard(...)` tearsheet (cumulative returns, drawdowns, rolling Sharpe/Sortino/volatility/beta, monthly heatmap, distribution). There is no separate matplotlib plotting step in this project.
 
 ## Monte Carlo Simulations
 
+Monte Carlo probabilities as numbers (bust / goal), for the plain-language report:
+
 ```python
 import openstatz as ostz
 
 returns = pf.returns()
 
-# Run Monte Carlo simulation
 mc = ostz.stats.montecarlo(returns, sims=1000, bust=-0.20, goal=0.50)
 
-# Probabilities
 print(f"Bust probability (>20% loss): {mc.bust_probability:.1%}")
 print(f"Goal probability (>50% gain): {mc.goal_probability:.1%}")
-
-# Plot Monte Carlo
-mc.plot()
 ```
 
 ## Complete Backtest Integration Template
@@ -183,7 +161,7 @@ mc.plot()
 Add this block at the end of every backtest script:
 
 ```python
-# --- OpenStatz Tearsheet ---
+# --- OpenStatz Tearsheet (modern interactive offline dashboard) ---
 try:
     import openstatz as ostz
 
@@ -191,16 +169,21 @@ try:
     if strategy_returns.index.tz is not None:
         strategy_returns.index = strategy_returns.index.tz_convert(None)
 
+    # dashboard() needs the benchmark as a returns Series (not a ticker string)
+    benchmark = ostz.providers.download_returns("^NSEI")
+    benchmark = benchmark.reindex(strategy_returns.index).fillna(0)
+
     tearsheet_file = script_dir / f"{SYMBOL}_tearsheet.html"
-    ostz.reports.html(
+    ostz.dashboard(
         strategy_returns,
-        benchmark="^NSEI",
+        benchmark=benchmark,
         output=str(tearsheet_file),
         title=f"{SYMBOL} - Strategy Tearsheet",
+        open_browser=False,
     )
     print(f"\nOpenStatz tearsheet saved to {tearsheet_file}")
 
-    # Quick Monte Carlo
+    # Quick Monte Carlo (numbers for the plain-language report)
     mc = ostz.stats.montecarlo(strategy_returns, sims=1000, bust=-0.10, goal=0.30)
     print(f"Monte Carlo (1000 sims): Bust prob={mc.bust_probability:.1%}, Goal prob={mc.goal_probability:.1%}")
 
@@ -211,12 +194,12 @@ except ImportError:
 
 ## Important Notes
 
-- OpenStatz analyzes **return series** (daily returns), not discrete trade data
-- Win Rate in OpenStatz = percentage of **days** with positive returns (not trade-level)
-- For trade-level metrics, use VectorBT's `pf.trades.win_rate()` and `pf.trades.profit_factor()`
-- Both metrics are valid - they measure different things
-- Always remove timezone from returns index before passing to OpenStatz
-- For Indian market benchmark, use `^NSEI` (NIFTY 50 on Yahoo Finance)
-- For US market benchmark, use `SPY` (S&P 500 ETF)
-- Never alias the import as `os` in a backtest script - it shadows the stdlib `os` module already used for `os.getenv()`
-- If porting an existing QuantStats script instead of writing a new one, `openstatz.compat.install_quantstats_shim()` followed by `import quantstats as qs` lets old `qs.*` code run unchanged against the OpenStatz engine - but new scripts should just call `openstatz` directly
+- The tearsheet is always `ostz.dashboard(...)` - a self-contained offline HTML file with the interactive dashboard. It needs no `openstatz serve`, no `[app]` extra, and no network.
+- `dashboard()` needs the benchmark as a `pd.Series` of returns. It does **not** accept a ticker string - fetch it with `ostz.providers.download_returns("^NSEI")` and reindex to the strategy index first.
+- Do not use the legacy `ostz.reports.html/full/basic/plots(...)` or the `ostz.plots.*` matplotlib gallery in this project - they reproduce the old QuantStats static look. Use the dashboard for visuals, `ostz.stats.*` / `ostz.reports.metrics()` for raw numbers.
+- OpenStatz analyzes **return series** (daily returns), not discrete trade data.
+- Win Rate in OpenStatz = percentage of **days** with positive returns (not trade-level). For trade-level metrics, use VectorBT's `pf.trades.win_rate()` and `pf.trades.profit_factor()`. Both are valid - they measure different things.
+- Always remove timezone from the returns index before passing to OpenStatz.
+- For Indian market benchmark use `^NSEI` (NIFTY 50 on Yahoo Finance); for US market use `SPY` (S&P 500 ETF).
+- Never alias the import as `os` in a backtest script - it shadows the stdlib `os` module already used for `os.getenv()`.
+- If porting an existing QuantStats script instead of writing a new one, `openstatz.compat.install_quantstats_shim()` followed by `import quantstats as qs` lets old `qs.*` code run unchanged against the OpenStatz engine - but new scripts should call `openstatz` directly and use `ostz.dashboard(...)` for the tearsheet.
