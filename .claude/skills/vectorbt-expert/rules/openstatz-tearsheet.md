@@ -45,21 +45,33 @@ strategy_returns = pf.returns()
 if strategy_returns.index.tz is not None:
     strategy_returns.index = strategy_returns.index.tz_convert(None)
 
+# IMPORTANT: name the series - this is what the tearsheet displays as the
+# strategy header, metrics column, and chart legend. Without it the dashboard
+# shows "Strategy" (or the price-column name like "close"). The title= argument
+# below only sets the browser-tab <title>, NOT the on-page strategy name.
+strategy_returns.name = "EMA Crossover"          # your strategy's name
+
 # dashboard() needs the benchmark as a RETURNS SERIES, not a ticker string.
 # (Unlike the removed reports.html, it does not download tickers for you.)
 benchmark = ostz.providers.download_returns("^NSEI")          # NIFTY 50
 benchmark = benchmark.reindex(strategy_returns.index).fillna(0)
+benchmark.name = "NIFTY 50"                       # names the benchmark column too
 
 # Generate the modern interactive offline tearsheet
 ostz.dashboard(
     strategy_returns,
     benchmark=benchmark,
     output="tearsheet.html",
-    title="Strategy Tearsheet",
-    open_browser=True,   # set False in headless/automated runs
+    title="EMA Crossover Tearsheet",   # browser tab only - not the on-page name
+    open_browser=True,                 # set False in headless/automated runs
 )
 print("Tearsheet saved to tearsheet.html")
 ```
+
+**`title=` names the browser tab; `.name` names the strategy inside the sheet.** The
+on-page `<h1>` header, the metrics-table column, and the chart legends all come from
+the pandas Series' `.name` attribute (it defaults to `"Strategy"` when unset). Always
+set `strategy_returns.name` (and `benchmark.name`) before calling `dashboard()`.
 
 ## Benchmark Options
 
@@ -75,15 +87,17 @@ benchmark = ostz.providers.download_returns("SPY")
 # Custom benchmark from OpenAlgo (convert close prices to returns first)
 benchmark = bench_close.pct_change().dropna()
 
-# In every case, align to the strategy index before passing:
+# In every case, align to the strategy index (and name it) before passing:
 benchmark = benchmark.reindex(strategy_returns.index).fillna(0)
+benchmark.name = "NIFTY 50"
 ostz.dashboard(strategy_returns, benchmark=benchmark, output="tearsheet.html")
 ```
 
-Running without a benchmark is also fine - just omit it:
+Running without a benchmark is also fine - just omit it (still name the strategy):
 
 ```python
-ostz.dashboard(strategy_returns, output="tearsheet.html", title="Strategy Tearsheet")
+strategy_returns.name = "EMA Crossover"
+ostz.dashboard(strategy_returns, output="tearsheet.html", title="EMA Crossover Tearsheet")
 ```
 
 ## Console Metrics (numbers only, no UI)
@@ -169,16 +183,22 @@ try:
     if strategy_returns.index.tz is not None:
         strategy_returns.index = strategy_returns.index.tz_convert(None)
 
+    # Name the series so the tearsheet header/column/legend show the strategy
+    # name, not "Strategy" or the price-column name. STRATEGY_NAME is a
+    # descriptive label you set for the run, e.g. "EMA 20/50 Crossover".
+    strategy_returns.name = f"{STRATEGY_NAME} - {SYMBOL}"
+
     # dashboard() needs the benchmark as a returns Series (not a ticker string)
     benchmark = ostz.providers.download_returns("^NSEI")
     benchmark = benchmark.reindex(strategy_returns.index).fillna(0)
+    benchmark.name = "NIFTY 50"
 
     tearsheet_file = script_dir / f"{SYMBOL}_tearsheet.html"
     ostz.dashboard(
         strategy_returns,
         benchmark=benchmark,
         output=str(tearsheet_file),
-        title=f"{SYMBOL} - Strategy Tearsheet",
+        title=f"{STRATEGY_NAME} - {SYMBOL}",   # browser tab only
         open_browser=True,   # opens the tearsheet in the browser after each run
     )
     print(f"\nOpenStatz tearsheet saved to {tearsheet_file}")
@@ -195,6 +215,7 @@ except ImportError:
 ## Important Notes
 
 - The tearsheet is always `ostz.dashboard(...)` - a self-contained offline HTML file with the interactive dashboard. It needs no `openstatz serve`, no `[app]` extra, and no network.
+- **Set `strategy_returns.name` (and `benchmark.name`) before calling `dashboard()`.** That name is what the tearsheet displays as the strategy header (`<h1>`), the metrics-table column, and the chart legends. It defaults to `"Strategy"` when unset, and `pf.returns()` often inherits the price-column name (e.g. `"close"`), so an unnamed series shows the wrong label. The `title=` argument only rewrites the browser-tab `<title>` - it does **not** change any on-page label.
 - `dashboard()` needs the benchmark as a `pd.Series` of returns. It does **not** accept a ticker string - fetch it with `ostz.providers.download_returns("^NSEI")` and reindex to the strategy index first.
 - Do not use the legacy `ostz.reports.html/full/basic/plots(...)` or the `ostz.plots.*` matplotlib gallery in this project - they reproduce the old QuantStats static look. Use the dashboard for visuals, `ostz.stats.*` / `ostz.reports.metrics()` for raw numbers.
 - OpenStatz analyzes **return series** (daily returns), not discrete trade data.
