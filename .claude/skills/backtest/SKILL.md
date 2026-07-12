@@ -38,7 +38,7 @@ If no arguments, ask the user which strategy they want.
    - Print full `pf.stats()`
    - **Print Strategy vs Benchmark comparison table** (Total Return, Sharpe, Sortino, Max DD, Win Rate, Trades, Profit Factor)
    - **Explain the backtest report** in plain language for normal traders
-   - Generate the OpenStatz interactive dashboard tearsheet via `ostz.dashboard(...)` if `openstatz` is available - a self-contained offline HTML file, no server needed (always use OpenStatz, never QuantStats; never the legacy `ostz.reports.html` static report)
+   - Generate the OpenStatz interactive dashboard tearsheet via `ostz.dashboard(...)` if `openstatz` is available - a self-contained offline HTML file, no server needed (always use OpenStatz, never QuantStats; never the legacy `ostz.reports.html` static report). **Set `strategy_returns.name` (e.g. `"EMA 20/50 Crossover - SBIN"`) and `benchmark.name` before calling `dashboard()`** - that name, not the `title=` argument, is what the tearsheet shows as the strategy header/column/legend (see the openstatz-tearsheet rule)
    - Plot equity curve + drawdown using Plotly (`template="plotly_dark"`)
    - Export trades to CSV
 5. Never use icons/emojis in code or logger output
